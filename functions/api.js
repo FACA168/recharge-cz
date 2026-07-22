@@ -9,6 +9,7 @@ function b64encode(buf) {
   return btoa(String.fromCharCode(...new Uint8Array(buf)))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
+
 function b64decode(s) {
   s = s.replace(/-/g, '+').replace(/_/g, '/');
   const pad = s.length % 4 ? 4 - (s.length % 4) : 0;
@@ -21,8 +22,31 @@ function b64decode(s) {
 
 async function hashPassword(password, saltB64) {
   let salt;
-  if (saltB64) { salt = b64decode(saltB64); } else { salt = crypto.getRandomValues(new Uint8Array(16)); }
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBK hashPassword(password, parts[2]);
+  if (saltB64) {
+    salt = b64decode(saltB64);
+  } else {
+    salt = crypto.getRandomValues(new Uint8Array(16));
+  }
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: PBKDF2_ITER, hash: 'SHA-256' },
+    key,
+    256
+  );
+  const saltOut = saltB64 || b64encode(salt);
+  return `pbkdf2$${PBKDF2_ITER}$${saltOut}$${b64encode(bits)}`;
+}
+
+async function verifyPassword(password, stored) {
+  if (!stored || !stored.startsWith('pbkdf2$')) return false;
+  const parts = stored.split('$');
+  const computed = await hashPassword(password, parts[2]);
   const a = new TextEncoder().encode(computed);
   const b = new TextEncoder().encode(stored);
   if (a.length !== b.length) return false;
@@ -32,20 +56,46 @@ async function hashPassword(password, saltB64) {
 }
 
 function sbHeaders(env, extra = {}) {
-  return { 'Content-Type': 'application/json', 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, ...extra };
+  return {
+    'Content-Type': 'application/json',
+    'apikey': env.SUPABASE_SERVICE_KEY,
+    'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+    ...extra
+  };
 }
+
 async function sbFetch(env, path, options = {}) {
   const url = `${env.SUPABASE_URL}/rest/v1${path}`;
-  const res = await fetch(url, { ...options, headers: sbHeaders(env, options.headers || {}) });
+  const res = await fetch(url, {
+    ...options,
+    headers: sbHeaders(env, options.headers || {})
+  });
   const text = await res.text();
-  let json = null; try { json = text ? JSON.parse(text) : null; } catch (e) { json = null; }
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch (e) { json = null; }
   return { ok: res.ok, status: res.status, json, text };
 }
 
-function ok(data) { return new Response(JSON.stringify({ success: true, data }), { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }); }
-function fail(msg, status = 400) { return new Response(JSON.stringify({ success: false, error: msg }), { status, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }); }
+function ok(data) {
+  return new Response(JSON.stringify({ success: true, data }), {
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+  });
+}
+
+function fail(msg, status = 400) {
+  return new Response(JSON.stringify({ success: false, error: msg }), {
+    status,
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+  });
+}
+
 function jsonBody(req) { return req.json().catch(() => ({})); }
-function sanitizeSettings(s) { if (!s) return s; const { admin_password, ...rest } = s; return rest; }
+
+function sanitizeSettings(s) {
+  if (!s) return s;
+  const { admin_password, ...rest } = s;
+  return rest;
+}
 
 async function handleAction(action, data, env) {
   switch (action) {
@@ -57,7 +107,11 @@ async function handleAction(action, data, env) {
     case 'saveSettings': {
       const patch = data || {};
       if (patch.admin_password) patch.admin_password = await hashPassword(patch.admin_password);
-      const r = await sbFetch(env, '/settings?id=eq.1', { method: 'PATCH', body: JSON.stringify(patch), headers: { 'Prefer': 'return=minimal' } });
+      const r = await sbFetch(env, '/settings?id=eq.1', {
+        method: 'PATCH',
+        body: JSON.stringify(patch),
+        headers: { 'Prefer': 'return=minimal' }
+      });
       if (!r.ok) return fail('保存失败: ' + (r.text || r.status));
       return ok({ saved: true });
     }
@@ -68,12 +122,20 @@ async function handleAction(action, data, env) {
       return ok(r.json && r.json[0] ? r.json[0] : null);
     }
     case 'createVoucher': {
-      const r = await sbFetch(env, '/vouchers', { method: 'POST', body: JSON.stringify({ phone: data.phone, code: data.code, status: 'active' }), headers: { 'Prefer': 'return=minimal' } });
+      const r = await sbFetch(env, '/vouchers', {
+        method: 'POST',
+        body: JSON.stringify({ phone: data.phone, code: data.code, status: 'active' }),
+        headers: { 'Prefer': 'return=minimal' }
+      });
       if (!r.ok) return fail('创建券失败: ' + (r.text || r.status));
       return ok({ code: data.code });
     }
     case 'createOrder': {
-      const r = await sbFetch(env, '/orders', { method: 'POST', body: JSON.stringify(data), headers: { 'Prefer': 'return=minimal' } });
+      const r = await sbFetch(env, '/orders', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Prefer': 'return=minimal' }
+      });
       if (!r.ok) return fail('下单失败: ' + (r.text || r.status));
       return ok({ id: data.id });
     }
@@ -89,7 +151,11 @@ async function handleAction(action, data, env) {
       return ok(r.json || []);
     }
     case 'updateOrderStatus': {
-      const r = await sbFetch(env, `/orders?id=eq.${encodeURIComponent(data.orderId)}`, { method: 'PATCH', body: JSON.stringify({ status: data.status }), headers: { 'Prefer': 'return=minimal' } });
+      const r = await sbFetch(env, `/orders?id=eq.${encodeURIComponent(data.orderId)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: data.status }),
+        headers: { 'Prefer': 'return=minimal' }
+      });
       if (!r.ok) return fail('更新失败: ' + (r.text || r.status));
       return ok({ ok: true });
     }
@@ -106,10 +172,18 @@ async function handleAction(action, data, env) {
       const bin = b64decode(base64);
       const up = await fetch(`${env.SUPABASE_URL}/storage/v1/object/files/${fileName}`, {
         method: 'POST',
-        headers: { 'apikey': env.SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`, 'Content-Type': contentType || 'application/octet-stream', 'x-upsert': 'true' },
+        headers: {
+          'apikey': env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+          'Content-Type': contentType || 'application/octet-stream',
+          'x-upsert': 'true'
+        },
         body: bin
       });
-      if (!up.ok) { const t = await up.text(); return fail('上传失败: ' + t); }
+      if (!up.ok) {
+        const t = await up.text();
+        return fail('上传失败: ' + t);
+      }
       const publicUrl = `${env.SUPABASE_URL}/storage/v1/object/files/${fileName}`;
       return ok({ publicUrl });
     }
@@ -122,12 +196,21 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } });
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
   }
   if (url.pathname === '/api' && request.method === 'POST') {
     const body = await jsonBody(request);
-    try { return await handleAction(body.action, body.data || {}, env); }
-    catch (e) { return fail('服务器错误: ' + e.message, 500); }
+    try {
+      return await handleAction(body.action, body.data || {}, env);
+    } catch (e) {
+      return fail('服务器错误: ' + e.message, 500);
+    }
   }
   return fail('Not Found', 404);
 }
