@@ -100,11 +100,13 @@ function sanitizeSettings(s) {
 async function handleAction(action, data, env) {
   switch (action) {
     case 'getSettings': {
-      const r = await sbFetch(env, '/settings?id=eq.1&select=*');
-      if (!r.ok || !r.json || !r.json[0]) return fail('配置不存在');
-      return ok(sanitizeSettings(r.json[0]));
-    }
-    case 'saveSettings': {
+  const r = await sbFetch(env, '/settings?id=eq.1&select=*');
+  if (!r.ok || !r.json || !r.json[0]) {
+    return fail('配置不存在: ok=' + r.ok + ' status=' + r.status + ' text=' + (r.text || '空'));
+  }
+  return ok(sanitizeSettings(r.json[0]));
+}
+   case 'saveSettings': {
       const patch = data || {};
       if (patch.admin_password) patch.admin_password = await hashPassword(patch.admin_password);
       const r = await sbFetch(env, '/settings?id=eq.1', {
