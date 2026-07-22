@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>充值中心</title>
+<style>
+:root{--gd:#0d4b2a;--gm:#1a5c32;--gl:#e8f5e9;--gold:#c8963e;--gol:#fdf6e8;--gb:#d4a843;--red:#c62828;--rl:#ffebee;--bg:#f0f2f5;--w:#fff;--t:#1a1a1a;--ts:#666;--tl:#999;--b:#e0e0e0;--s:0 2px 12px rgba(0,0,0,0.08);--sl:0 8px 32px rgba(0,0,0,0.12);--r:12px;--rs:8px;--tr:0.25s cubic-bezier(0.4,0,0.2,1);--fs:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--fs);background:var(--bg);color:var(--t);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+.app-container{width:100%;max-width:450px;min-height:100vh;background:var(--bg);position:relative;overflow-x:hidden}
+.nav-header{background:var(--gd);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.nav-header .logo-area{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-header .logo-placeholder{width:38px;height:38px;border-radius:8px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0}
+.nav-header .site-name{color:#fff;font-size:17px;font-weight:600;letter-spacing:.5px;white-space:nowrap;user-select:none;cursor:pointer}
+.nav-header .nav-actions{margin-left:auto;display:flex;gap:8px}
+.nav-header .btn-nav{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:7px 13px;border-radius:20px;font-size:13px;cursor:pointer;transition:var(--tr);white-space:nowrap;font-family:var(--fs)}
+.nav-header .btn-nav:active{background:rgba(255,255,255,0.28);transform:scale(.96)}
+.page{display:none;padding:16px;animation:fadeSlideIn .3s ease}
+.page.active{display:block}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.banner-wrap{border-radius:var(--r);overflow:hidden;margin-bottom:14px;box-shadow:var(--s);background:#e8f0e9;min-height:100px;display:flex;align-items:center;justify-content:center}
+.banner-wrap img{width:100%;display:block;object-fit:cover;max-height:180px}
+.banner-placeholder{color:var(--gm);font-size:15px;font-weight:500;padding:30px;text-align:center;letter-spacing:1px}
+.announcement-bar{background:#fffbe6;border:1px solid #ffe58f;border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:13px;color:#8a6d14;display:flex;align-items:center;gap:8px;animation:pulseBorder 2s infinite}
+@keyframes pulseBorder{0%,100%{border-color:#ffe58f}50%{border-color:#f0c040}}
+.card{background:var(--w);border-radius:var(--r);padding:18px 16px;margin-bottom:14px;box-shadow:var(--s)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #f0f0f0;display:flex;align-items:center;gap:8px}
+.card-title .dot{width:8px;height:8px;border-radius:50%;background:var(--gm);flex-shrink:0}
+.input-group{margin-bottom:14px}
+.input-group label{display:block;font-size:13px;font-weight:500;color:var(--ts);margin-bottom:6px}
+.input-group input{width:100%;padding:12px 14px;border:2px solid var(--b);border-radius:var(--rs);font-size:16px;font-family:var(--fs);transition:var(--tr);background:#fafbfc;outline:none}
+.input-group input:focus{border-color:var(--gm);background:#fff;box-shadow:0 0 0 3px rgba(26,92,50,0.08)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:13px 24px;border-radius:25px;font-size:15px;font-weight:600;border:none;cursor:pointer;transition:var(--tr);font-family:var(--fs);width:100%}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn-primary{background:linear-gradient(135deg,#1a5c32,#0d4b2a);color:#fff;box-shadow:0 4px 14px rgba(13,75,42,0.3)}
+.btn-gold{background:linear-gradient(135deg,#d4a843,#b8861e);color:#fff;box-shadow:0 4px 14px rgba(200,150,62,0.35);font-size:16px;letter-spacing:1px}
+.btn-outline{background:#fff;color:var(--gm);border:2px solid var(--gm)}
+.btn-sm{padding:8px 16px;font-size:13px;border-radius:20px;width:auto}
+.btn:disabled{opacity:.5;pointer-events:none}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:13px}
+.status-processing{background:#fff8e1;color:#f09d00;border:1px solid #ffe0a0}
+.status-success{background:#e8f5e9;color:#2e7d32;border:1px solid #b9dfc4}
+.status-failed{background:#ffebee;color:#c62828;border:1px solid #ffcdd2}
+.amount-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.amount-card{border:2px solid var(--b);border-radius:var(--rs);padding:14px 10px;text-align:center;cursor:pointer;background:#fafbfc;user-select:none}
+.amount-card.selected{border-color:var(--gb);background:var(--gol)}
+.amount-card .amount-main{font-size:22px;font-weight:700}
+.amount-card .amount-discount{font-size:12px;color:var(--gold);margin-top:4px}
+.calc-summary{background:#f9fafb;border-radius:var(--rs);padding:14px;margin-bottom:14px;border:1px dashed #dde}
+.calc-row{display:flex;justify-content:space-between;padding:7px 0;font-size:14px}
+.calc-row.total{border-top:1px solid #e8e8e8;margin-top:6px;padding-top:10px;font-weight:700;font-size:17px;color:var(--gd)}
+.qr-section{text-align:center;padding:10px 0}
+.qr-tabs{display:flex;gap:8px;margin-bottom:12px;justify-content:center}
+.qr-tab{padding:9px 18px;border-radius:20px;border:2px solid var(--b);background:#fff;cursor:pointer;font-size:13px}
+.qr-tab.active{border-color:var(--gm);background:var(--gl);color:var(--gd);font-weight:600}
+.qr-img-wrap{width:180px;height:180px;margin:0 auto;border-radius:var(--rs);overflow:hidden;border:2px solid #eee;background:#fff;display:flex;align-items:center;justify-content:center}
+.upload-area{border:2px dashed #d0d5dd;border-radius:var(--rs);padding:20px;text-align:center;cursor:pointer;background:#fafbfc}
+.upload-area:active{background:#f0f4f0}
+.upload-area img{max-width:100%;max-height:200px;border-radius:6px;margin-top:8px}
+.upload-area.has-image{border-color:#4caf50;background:#f9fdf9}
+#uploadInput{display:none}
+.result-icon{font-size:64px;text-align:center;margin:20px 0;animation:bounceIn .5s ease}
+@keyframes bounceIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.05)}70%{transform:scale(.95)}100%{transform:scale(1);opacity:1}}
+.info-table{width:100%;font-size:13px;border-collapse:collapse}
+.info-table td{padding:8px 10px;border-bottom:1px solid #f5f5f5}
+.info-table td:first-child{color:var(--ts);width:30%}
+.cs-link{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:#fff;border-radius:25px;color:var(--gm);font-weight:600;text-decoration:none;border:2px solid var(--gm);margin-top:10px}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:999;display:flex;align-items:center;justify-content:center}
+.modal-dialog{background:#fff;border-radius:var(--r);padding:20px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:var(--sl);width:400px;position:relative}
+.modal-close{position:absolute;top:10px;right:14px;background:0 0;border:none;font-size:22px;cursor:pointer;color:#999}
+.admin-container{max-width:800px;width:100%;padding:16px}
+.admin-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:25px;padding:5px;box-shadow:var(--s)}
+.admin-tab{flex:1;min-width:70px;padding:10px 12px;border-radius:20px;border:none;background:0 0;cursor:pointer;font-size:13px}
+.admin-tab.active{background:var(--gd);color:#fff;font-weight:600}
+.admin-panel{display:none}
+.admin-panel.active{display:block;animation:fadeSlideIn .3s ease}
+.order-table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:var(--rs);overflow:hidden;box-shadow:var(--s)}
+.order-table th,.order-table td{padding:10px 8px;text-align:left;border-bottom:1px solid #eee}
+.order-table th{background:#f5f7f6;font-weight:600;color:var(--ts);font-size:11px}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}
+.badge-processing{background:#fff8e1;color:#e6a000}
+.badge-failed{background:#ffebee;color:#c62828}
+.badge-success{background:#e8f5e9;color:#2e7d32}
+.search-box{display:flex;gap:8px;margin-bottom:14px}
+.search-box input{flex:1;padding:10px 14px;border:2px solid var(--b);border-radius:25px;font-size:14px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;flex-wrap:wrap;gap:10px}
+.settings-row input[type="text"],.settings-row input[type="url"],.settings-row input[type="password"]{flex:1;min-width:180px;padding:9px 12px;border:2px solid var(--b);border-radius:20px;font-size:13px}
+.img-upload-btn{padding:8px 16px;border-radius:20px;background:#f0f4f1;border:1px dashed #aaa;cursor:pointer;font-size:12px}
+.settings-preview-img{width:60px;height:60px;object-fit:contain;border-radius:6px;border:1px solid #ddd}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:25px;font-size:14px;z-index:2000;animation:toastIn .3s ease,toastOut .3s ease 1.8s forwards;max-width:90vw}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(-50%) translateY(-20px)}}
+.loading-mask{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;z-index:9999;font-size:18px;color:var(--gm);flex-direction:column;gap:10px}
+.spinner{width:40px;height:40px;border:4px solid #e0e0e0;border-top-color:var(--gm);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.order-item{border-bottom:1px solid #eee;padding:10px 0;font-size:14px}
+.order-item:last-child{border-bottom:none}
+.order-item .order-id{font-weight:600;color:#0d4b2a}
+.order-item .order-status{float:right}
+.order-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.order-actions select{font-size:11px;padding:5px}
+</style>
+</head>
+<body>
+<div class="loading-mask" id="loadingMask"><div class="spinner"></div><span>正在加载数据…</span></div>
+<div class="app-container">
+<div class="nav-header">
+<div class="logo-area">
+<span class="logo-placeholder" id="navLogoPlaceholder">⛽</span>
+<span class="site-name" id="navSiteName">充值中心</span>
+</div>
+<div class="nav-actions">
+<button class="btn-nav" id="btnHome">🏠 首页</button>
+<button class="btn-nav" id="btnQuery">🔍 查订单</button>
+</div>
+</div>
+<div class="page" id="pageHome">
+<div class="banner-wrap" id="homeBanner"><span class="banner-placeholder">🎉 充值特惠 · 代金券限时领</span></div>
+<div class="announcement-bar"><span>📢</span><span id="announcementText">欢迎使用充值服务，代金券限量发放中！</span></div>
+<div class="card">
+<div class="card-title"><span class="dot"></span>领取电子代金券</div>
+<div class="input-group"><label>📱 手机号码</label><input type="tel" id="inputPhone" placeholder="请输入您的手机号码" maxlength="11" inputmode="numeric" autocomplete="tel"></div>
+<button class="btn btn-gold" id="btnClaim">🎫 立即领取电子代金券</button>
+<div style="margin-top:14px;text-align:center;" id="voucherStatusArea"><span style="color:#999;font-size:13px;">请输入手机号领取</span></div>
+<button class="btn btn-primary" style="margin-top:10px;" id="btnNext" disabled>📋 下一步 →</button>
+</div>
+</div>
+<div class="page" id="pageRecharge">
+<div class="card">
+<div class="card-title"><span class="dot"></span>充值信息</div>
+<div class="input-group"><label>📱 手机号</label><input type="text" id="rechargePhone" readonly></div>
+<div class="input-group"><label>👤 联系人</label><input type="text" id="rechargeContact" placeholder="请输入联系人姓名"></div>
+<div class="input-group"><label>🎫 电子券编号</label><input type="text" id="rechargeVoucherCode" readonly style="background:#fffef5;color:#8b5e1a;font-weight:600;border-color:#f0d78c;"></div>
+<div style="text-align:center;"><span class="status-badge" style="background:#e8f5e9;color:#1a5c32;">🟢 已激活</span></div>
+</div>
+<div class="card">
+<div class="card-title"><span class="dot"></span>选择充值金额</div>
+<div class="amount-options" id="amountOptions">
+<div class="amount-card" data-amount="200" data-discount="28"><div class="amount-main">¥200</div><div class="amount-discount">🎫 代金券 ¥28</div></div>
+<div class="amount-card" data-amount="300" data-discount="58"><div class="amount-main">¥300</div><div class="amount-discount">🎫 代金券 ¥58</div></div>
+<div class="amount-card" data-amount="400" data-discount="98"><div class="amount-main">¥400</div><div class="amount-discount">🎫 代金券 ¥98</div></div>
+<div class="amount-card" data-amount="500" data-discount="128"><div class="amount-main">¥500</div><div class="amount-discount">🎫 代金券 ¥128</div></div>
+</div>
+<div class="calc-summary">
+<div class="calc-row"><span>充值金额</span><span id="calcAmount">¥0</span></div>
+<div class="calc-row"><span>代金券优惠</span><span style="color:#c8963e;" id="calcDiscount">-¥0</span></div>
+<div class="calc-row total"><span>实付金额</span><span style="color:#c62828;font-size:18px;" id="calcActual">¥0</span></div>
+</div>
+</div>
+<div class="card">
+<div class="card-title"><span class="dot"></span>支付方式</div>
+<div class="qr-section">
+<div class="qr-tabs">
+<button class="qr-tab active" data-method="wechat">💚 微信支付</button>
+<button class="qr-tab" data-method="alipay">💙 支付宝</button>
+</div>
+<div class="qr-img-wrap" id="qrDisplay" data-payment="wechat"><span class="qr-placeholder">请在后台设置收款码</span></div>
+<p style="font-size:11px;color:#999;">请扫描上方二维码完成支付</p>
+</div>
+<div class="upload-area" id="uploadArea">
+<div class="upload-icon">📸</div>
+<div class="upload-text">点击上传付款截图</div>
+<img id="uploadPreview" style="display:none;">
+</div>
+<input type="file" id="uploadInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;">
+<button class="btn btn-primary" style="margin-top:12px;" id="submitOrderBtn">✅ 提交订单</button>
+</div>
+</div>
+<div class="page" id="pageResult">
+<div class="card" style="text-align:center;">
+<div class="result-icon" id="resultIcon">⏳</div>
+<div class="result-status" id="resultStatus">🟡 处理中…</div>
+</div>
+<div class="card">
+<div class="card-title"><span class="dot"></span>订单详情</div>
+<table class="info-table">
+<tr><td>订单号</td><td id="resOrder="page" id="pageAdmin">
+<div class="admin-container">
+<h3 style="text-align:center;color:var(--gd);">🔐 后台管理</h3>
+<div id="adminLoginArea">
+<div class="card">
+<div class="input-group"><label>管理员密码</label><input type="password" id="adminPasswordInput" placeholder="请输入管理密码" autocomplete="current-password"></div>
+<button class="btn btn-primary" id="btnAdminLogin">登录</button>
+<p style="font-size:11px;color:#999;text-align:center;">请使用管理员分配的密码登录</p>
+</div>
+</div>
+<div id="adminContentArea" style="display:none;">
+<div class="admin-tabs">
+<button class="admin-tab active" data-tab="orders">📋 订单管理</button>
+<button class="admin-tab" data-tab="qrcodes">📱 收款码</button>
+<button class="admin-tab" data-tab="service">💬 客服设置</button>
+<button class="admin-tab" data-tab="site">🌐 网站设置</button>
+</div>
+<div class="admin-panel active" id="adminPanelOrders">
+<div class="search-box">
+<input type="text" id="orderSearchInput" placeholder="搜索手机号/订单号">
+<button class="btn btn-sm btn-primary" id="btnSearchOrders">搜索</button>
+</div>
+<table class="order-table">
+<thead><tr><th>订单号</th><th>手机号</th><th>券编号</th><th>金额</th><th>实付</th><th>状态</th><th>操作</th></tr></thead>
+<tbody id="orderTableBody"></tbody>
+</table>
+</div>
+<div class="admin-panel" id="adminPanelQRCodes">
+<div class="card">
+<div class="settings-row"><label>💚 微信收款码</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="wechatQRInput"><button class="img-upload-btn" id="btnWechatQR">上传图片</button><img class="settings-preview-img" id="wechatQRPreview"><span id="wechatQRStatus">未设置</span></div>
+<div class="settings-row"><label>💙 支付宝收款码</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="alipayQRInput"><button class="img-upload-btn" id="btnAlipayQR">上传图片</button><img class="settings-preview-img" id="alipayQRPreview"><span id="alipayQRStatus">未设置</span></div>
+</div>
+</div>
+<div class="admin-panel" id="adminPanelService">
+<div class="card">
+<div class="settings-row"><label>客服名称</label><input type="text" id="csNameInput"></div>
+<div class="settings-row"><label>客服链接</label><input type="url" id="csLinkInput"></div>
+<button class="btn btn-primary btn-sm" id="btnSaveService">💾 保存客服设置</button>
+</div>
+</div>
+<div class="admin-panel" id="adminPanelSite">
+<div class="card">
+<div class="settings-row"><label>网站名称</label><input type="text" id="siteNameInput"></div>
+<div class="settings-row"><label>Logo图片</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="logoInput"><button class="img-upload-btn" id="btnLogo">上传Logo</button><img class="settings-preview-img" id="logoPreview"></div>
+<div class="settings-row"><label>Banner图片</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="bannerInput"><button class="img-upload-btn" id="btnBanner">上传Banner</button><img class="settings-preview-img" id="bannerPreview"></div>
+<div class="settings-row"><label>首页公告</label><input type="text" id="announcementInput"></div>
+<div class="settings-row"><label>管理密码</label><input type="password" id="adminPwdInput" placeholder="修改管理密码" autocomplete="new-password"></div>
+<button class="btn btn-primary btn-sm" id="btnSaveSite">💾 保存网站设置</button>
+</div>
+</div>
+<button class="btn btn-outline btn-sm" style="margin-top:12px;" id="btnAdminLogout">🚪 退出登录</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="queryModal" style="display:none;">
+<div class="modal-dialog">
+<button class="modal-close" id="btnCloseQuery">✕</button>
+<h4>🔍 查询我的订单</h4>
+<div class="input-group" style="margin-top:12px;">
+<label>📱 手机号码</label>
+<input type="tel" id="queryPhone" placeholder="输入领券时的手机号" inputmode="numeric" maxlength="11">
+</div>
+<button class="btn btn-primary" id="btnQuerySubmit">查询</button>
+<div id="queryResult" style="margin-top:12px;"></div>
+</div>
+</div>
+<div class="modal-overlay" id="modalOverlay" style="display:none;">
+<div class="modal-dialog">
+<button class="modal-close" id="btnCloseModal">✕</button>
+<h4>📸 支付凭证</h4>
+<img id="modalImage" src="" style="width:100%;border-radius:6px;">
+</div>
+</div>
+<script>
+const API_URL = '/api';
+async function callProxy(action, data = null) {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, data })
+    });
+    const result = await response.json();
+    if (result.success) { return result.data; } else { throw new Error(result.error || '请求失败'); }
+  } catch (error) { console.error(`Proxy call failed (${action}):`, error); throw error; }
+}
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function uploadFile(file, folder) {
+  const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+  const fileName = folder + '/' + Date.now() + '_' + Math.random().toString(36).substring(2,8) + '.' + ext;
+  const base64 = await fileToBase64(file);
+  const data = await callProxy('uploadFile', { fileName, contentType: file.type, base64 });
+  if (!data || !data.publicUrl) throw new Error('上传未返回地址');
+  return data.publicUrl;
+}
+let appData = {
+  settings: { site_name: '充值中心', logo: '', banner: '', announcement: '欢迎使用充值服务，代金券限量发放中！', wechat_qr: '', alipay_qr: '', cs_name: '在线客服', cs_link: '#' },
+  orders: [], currentPhone: '', currentVoucherCode: ''
+};
+function formatPhone(p) { return (p && p.length===11) ? p.substring(0,3)+'****'+p.substring(7) : (p||''); }
+function generateVoucherCode() { let c='OC-'; for(let i=0;i<10;i++) c+='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.charAt(Math.floor(Math.random()*36)); return c; }
+function generateOrderId() { const n=new Date(); const t=n.getFullYear()+String(n.getMonth()+1).padStart(2,'0')+String(n.getDate()).padStart(2,'0')+String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0')+String(n.getSeconds()).padStart(2,'0'); return 'ORD'+t+Math.random().toString(36).substring(2,6).toUpperCase(); }
+function showToast(m) { const e=document.querySelector('.toast'); if(e)e.remove(); const t=document.createElement('div'); t.className='toast'; t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+function $(id){ return document.getElementById(id); }
+function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[c])); }
+async function loadAllData() {
+  const lm = $('loadingMask');
+  const timeoutPromise = new Promise((_,r)=>setTimeout(()=>r(new Error('连接超时，请检查网络或切换网络重试')),8000));
+  try {
+    await Promise.race([
+      (async() => {
+        const settingsData = await callProxy('getSettings');
+        if (settingsData) appData.settings = { ...appData.settings, ...settingsData };
+        try { const s = localStorage.getItem('recharge_session'); if (s) { const ses = JSON.parse(s); appData.currentPhone = ses.phone || ''; appData.currentVoucherCode = ses.voucher || ''; } } catch(e) {}
+        return 'success';
+      })(), timeoutPromise
+    ]);
+    applySettings(); showPage('pageHome'); lm.style.display = 'none';
+  } catch(e) {
+    console.error(e);
+    lm.innerHTML = '<div style="text-align:center;color:#c62828;"><div style="font-size:48px;">⚠️</div><p style="font-size:16px;margin:12px 0;">'+escapeHtml(e.message)+'</p><p style="font-size:14px;color:#666;">建议切换 WiFi/4G 网络后重试</p><button class="retry-btn" onclick="location.reload()" style="margin-top:16px;padding:10px 30px;border-radius:20px;border:none;background:#1a5c32;color:#fff;font-size:16px;cursor:pointer;">🔄 重新加载</button></div>';
+    showToast('⚠️ 数据加载失败，请检查网络或切换网络重试');
+  }
+}
+function saveSession() { try { localStorage.setItem('recharge_session', JSON.stringify({phone:appData.currentPhone, voucher:appData.currentVoucherCode})); } catch(e) {} }
+function applySettings() {
+  const s = appData.settings;
+  $('navSiteName').textContent = s.site_name || '充值中心';
+  document.title = s.site_name || '充值中心';
+  $('announcementText').textContent = s.announcement || '';
+  const lp = $('navLogoPlaceholder');
+  if(s.logo) { lp.innerHTML = '<img class="logo-img" src="'+s.logo+'" style="width:38px;height:38px;border-radius:8px;object-fit:contain;">'; } else { lp.innerHTML = '⛽'; }
+  const bw = $('homeBanner');
+  if(s.banner) { bw.innerHTML = '<img src="'+s.banner+'" alt="Banner">'; } else { bw.innerHTML = '<span class="banner-placeholder">🎉 充值特惠 · 代金券限时领</span>'; }
+  const cl = $('csLinkResult');
+  cl.textContent = '💬 联系' + (s.cs_name||'在线客服');
+  cl.href = s.cs_link||'#';
+  if(!s.cs_link || s.cs_link==='#') { cl.setAttribute('onclick','showToast("客服链接暂未设置");return false;'); } else { cl.removeAttribute('onclick'); }
+  updateQRDisplay();
+}
+function updateQRDisplay() {
+  const qd = $('qrDisplay');
+  const method = qd.getAttribute('data-payment') || 'wechat';
+  const qrData = method==='wechat' ? appData.settings.wechat_qr : appData.settings.alipay_qr;
+  if(qrData) { qd.innerHTML = '<img src="'+qrData+'" alt="收款码" style="width:100%;height:100%;object-fit:contain;">'; } else { qd.innerHTML = '<span class="qr-placeholder">请在后台设置'+(method==='wechat'?'微信':'支付宝')+'收款码</span>'; }
+}
+function showPage(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); const el = $(id); if(el) el.classList.add('active'); window.scrollTo(0,0); }
+function goToHome() {
+  showPage('pageHome');
+  $('inputPhone').value = '';
+  $('voucherStatusArea').innerHTML = '<span style="color:#999;font-size:13px;">请输入手机号领取</span>';
+  $('btnNext').disabled = true;
+  appData.currentPhone = ''; appData.currentVoucherCode = '';
+  saveSession();
+}
+function goToRecharge() {
+  if(!appData.currentPhone || !appData.currentVoucherCode) { showToast('请先在首页领取代金券'); return; }
+  $('rechargePhone').value = appData.currentPhone;
+  $('rechargeVoucherCode').value = appData.currentVoucherCode;
+  $('rechargeContact').value = '';
+  document.querySelectorAll('#amountOptions .amount-card').forEach(c=>c.classList.remove('selected'));
+  $('calcAmount').textContent = '¥0'; $('calcDiscount').textContent = '-¥0'; $('calcActual').textContent = '¥0';
+  $('uploadPreview').style.display = 'none'; $('uploadPreview').dataset.url = '';
+  $('uploadArea').classList.remove('has-image');
+  $('uploadArea').querySelector('.upload-icon').style.display = 'block';
+  $('uploadArea').querySelector('.upload-text').textContent = '点击上传付款截图';
+  $('qrDisplay').setAttribute('data-payment','wechat');
+  document.querySelectorAll('#pageRecharge .qr-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  updateQRDisplay(); showPage('pageRecharge');
+}
+let clickCount = 0, clickTimer = null;
+function initSiteNameClick() {
+  const el = $('navSiteName');
+  el.addEventListener('click', function() {
+    clickCount++;
+    if(clickCount === 1) { clickTimer = setTimeout(()=>{ clickCount = 0; }, 2000); }
+    if(clickCount >= 5) { clearTimeout(clickTimer); clickCount = 0; goToAdmin(); showToast('🔐 已进入后台管理'); }
+  });
+}
+async function claimVoucher() {
+  const phoneInput = $('inputPhone');
+  const phone = phoneInput.value.replace(/\D/g,'').trim();
+  if(!/^1[3-9]\d{9}$/.test(phone)) { showToast('请输入有效的11位手机号码'); phoneInput.focus(); return; }
+  const statusArea = $('voucherStatusArea');
+  const btnClaim = $('btnClaim');
+  const btnNext = $('btnNext');
+  btnClaim.disabled = true; btnClaim.textContent = '⏳ 正在查询…';
+  statusArea.innerHTML = '<span style="color:#f09d00;font-size:13px;">🟡 正在查询…</span>';
+  btnNext.disabled = true;
+  try {
+    const existing = await callProxy('getVoucher', { phone });
+    let voucherCode;
+    if(existing) { voucherCode = existing.code; } else { voucherCode = generateVoucherCode(); await callProxy('createVoucher', { phone, code: voucherCode }); }
+    appData.currentPhone = phone; appData.currentVoucherCode = voucherCode;
+    saveSession();
+    statusArea.innerHTML = '<span style="color:#2e7d32;font-size:13px;font-weight:600;">🟢 查询完成</span>';
+    btnClaim.disabled = false; btnClaim.textContent = '🎫 立即领取电子代金券';
+    btnNext.disabled = false; showToast('✅ 代金券领取成功！');
+  } catch(err) {
+    console.error(err); showToast('❌ 领取失败：' + err.message);
+    statusArea.innerHTML = '<span style="color:#c62828;font-size:13px;">🔴 查询失败，请重试</span>';
+    btnClaim.disabled = false; btnClaim.textContent = '🎫 立即领取电子代金券';
+  }
+}
+function selectAmount(card) {
+  document.querySelectorAll('#amountOptions .amount-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  const amount = parseInt(card.getAttribute('data-amount'),10);
+  const discount = parseInt(card.getAttribute('data-discount'),10);
+  $('calcAmount').textContent = '¥'+amount; $('calcDiscount').textContent = '-¥'+discount; $('calcActual').textContent = '¥'+(amount-discount);
+}
+function switchPayment(method, btn) {
+  document.querySelectorAll('#pageRecharge .qr-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  $('qrDisplay').setAttribute('data-payment', method);
+  updateQRDisplay();
+}
+async function handleUpload(input) {
+  const file = input.files[0];
+  if(!file) return;
+  if(!/^image\//.test(file.type)) { showToast('仅支持图片文件'); input.value=''; return; }
+  if(file.size > 5*1024*1024) { showToast('图片不能超过5MB'); input.value=''; return; }
+  try {
+    const url = await uploadFile(file, 'uploads');
+    const preview = $('uploadPreview');
+    preview.src = url; preview.style.display = 'block'; preview.dataset.url = url;
+    $('uploadArea').classList.add('has-image');
+    $('uploadArea').querySelector('.upload-icon').style.display = 'none';
+    $('uploadArea').querySelector('.upload-text').textContent = '点击更换截图';
+    showToast('✅ 截图上传成功');
+  } catch(err) { console.error(err); showToast('❌ 上传失败：'+err.message); }
+  input.value = '';
+}
+async function submitOrder() {
+  const phone = $('rechargePhone').value;
+  const contact = $('rechargeContact').value.trim();
+  const selectedCard = document.querySelector('#amountOptions .amount-card.selected');
+  const uploadPreview = $('uploadPreview');
+  if(!contact) { showToast('请填写联系人姓名'); return; }
+  if(!selectedCard) { showToast('请选择充值金额'); return; }
+  if(!uploadPreview.dataset.url) { showToast('请上传付款截图'); return; }
+  const amount = parseInt(selectedCard.getAttribute('data-amount'),10);
+  const discount = parseInt(selectedCard.getAttribute('data-discount'),10);
+  const actual = amount - discount;
+  const paymentMethod = $('qrDisplay').getAttribute('data-payment') || 'wechat';
+  const orderId = generateOrderId();
+  const order = { id: orderId, phone, contact, voucher_code: $('rechargeVoucherCode').value, recharge_amount: amount, voucher_discount: discount, actual_pay: actual, payment_method: paymentMethod, payment_screenshot: uploadPreview.dataset.url, status: 'processing' };
+  try { await callProxy('createOrder', order); order.created_at = new Date().toISOString(); showResultPage(order); showToast('✅ 订单提交成功！'); }
+  catch(err) { console.error(err); showToast('❌ 提交失败：' + err.message); }
+}
+function showResultPage(order) {
+  $('resOrderId').textContent = order.id; $('resPhone').textContent = formatPhone(order.phone); $('resVoucherCode').textContent = order.voucher_code;
+  $('resAmount').textContent = '¥'+order.recharge_amount; $('resDiscount').textContent = '-¥'+order.voucher_discount; $('resActual').textContent = '¥'+order.actual_pay;
+  $('resStatusCell').innerHTML = '<span class="status-badge status-processing">🟡 处理中…</span>';
+  $('resultIcon').textContent = '⏳'; $('resultStatus').textContent = '🟡 处理中…';
+  showPage('pageResult');
+}
+function showQueryModal() { $('queryModal').style.display = 'flex'; $('queryPhone').value = ''; $('queryResult').innerHTML = ''; }
+function closeQueryModal() { $('queryModal').style.display = 'none'; }
+async function queryOrders() {
+  const phone = $('queryPhone').value.replace(/\D/g,'').trim();
+  if(!phone) { showToast('请输入手机号'); return; }
+  const resultDiv = $('queryResult');
+  resultDiv.innerHTML = '<span style="color:#f09d00;">⏳ 查询中…</span>';
+  try {
+    const orders = await callProxy('getOrdersByPhone', { phone });
+    if(!orders || orders.length === 0) { resultDiv.innerHTML = '<p style="color:#999;text-align:center;">暂无订单</p>'; return; }
+    const statusMap = {'processing':'🟡 处理中', 'failed':'🔴 失败', 'success':'🟢 成功'};
+    let html = '<div style="max-height:300px;overflow-y:auto;">';
+    orders.forEach(o => {
+      html += `<div class="order-item"><div class="order-id">📦 ${escapeHtml(o.id)}</div><div>金额：¥${o.actual_pay}　<span class="order-status">${statusMap[o.status]||escapeHtml(o.status)}</span></div><div style="font-size:12px;color:#999;">${(o.created_at&&!isNaN(new Date(o.created_at)))?new Date(o.created_at).toLocaleString():''}</div></div>`;
+    });
+    html += '</div>'; resultDiv.innerHTML = html;
+  } catch(err) { console.error(err); resultDiv.innerHTML = '<p style="color:#c62828;">❌ 查询失败：' + escapeHtml(err.message) + '</p>'; }
+}
+function goToAdmin() {
+  showPage('pageAdmin');
+  $('adminLoginArea').style.display = 'block';
+  $('adminContentArea').style.display = 'none';
+  $('adminPasswordInput').value = '';
+}
+async function adminLogin() {
+  const pwd = $('adminPasswordInput').value;
+  if(!pwd) { showToast('请输入密码'); return; }
+  try {
+    const res = await callProxy('adminLogin', { password: pwd });
+    if(res && res.ok) {
+      isAdmin = true; $('adminLoginArea').style.display = 'none'; $('adminContentArea').style.display = 'block';
+      await loadAdminOrders(); loadQRSettings(); loadServiceSettings(); loadSiteSettings(); showToast('✅ 登录成功');
+    } else { showToast('❌ 密码错误'); }
+  } catch(err) { showToast('❌ 验证失败，请检查网络'); }
+}
+let isAdmin = false;
+function adminLogout() { isAdmin = false; $('adminLoginArea').style.display = 'block'; $('adminContentArea').style.display = 'none'; }
+function switchAdminTab(tabName, btn) {
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
+  const panel = $('adminPanel'+tabName.charAt(0).toUpperCase()+tabName.slice(1));
+  if(panel) panel.classList.add('active');
+  if(tabName==='orders') renderOrderTable();
+  if(tabName==='qrcodes') loadQRSettings();
+  if(tabName==='service') loadServiceSettings();
+  if(tabName==='site') loadSiteSettings();
+}
+async function loadAdminOrders() {
+  try { const orders = await callProxy('getAllOrders'); if (orders) { appData.orders = orders; renderOrderTable(); } } catch(err) { showToast('加载订单失败：' + err.message); }
+}
+function renderOrderTable(filterText) {
+  filterText = (filterText||'').toLowerCase();
+  const tbody = $('orderTableBody');
+  let orders = appData.orders || [];
+  if(filterText) { orders = orders.filter(o => (o.id||'').toLowerCase().includes(filterText) || (o.phone||'').includes(filterText) || (o.voucher_code && o.voucher_code.toLowerCase().includes(filterText))); }
+  if(!orders.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">暂无订单</td></tr>'; return; }
+  const statusMap = {'processing':'🟡 处理中','failed':'🔴 失败','success':'🟢 成功'};
+  const badgeMap = {'processing':'badge-processing','failed':'badge-failed','success':'badge-success'};
+  tbody.innerHTML = orders.map(o => {
+    const statusText = statusMap[o.status] || escapeHtml(o.status);
+    const badgeClass = badgeMap[o.status] || '';
+    return `<tr><td title="${escapeHtml(o.id)}">${escapeHtml(o.id.substring(0,10))}…</td><td>${formatPhone(o.phone)}</td><td>${escapeHtml(o.voucher_code||'-')}</td><td>¥${o.recharge_amount}</td><td>¥${o.actual_pay}</td><td><span class="badge ${badgeClass}">${statusText}</span></td><td><div class="order-actions"><button class="btn btn-sm btn-outline" data-act="view" data-id="${escapeHtml(o.id)}">查看凭证</button><select data-act="status" data-id="${escapeHtml(o.id)}" style="font-size:11px;padding:5px;"><option value="">修改状态</option><option value="processing" ${o.status==='processing'?'selected':''}>处理中</option><option value="failed" ${o.status==='failed'?'selected':''}>充值失败</option><option value="success" ${o.status==='success'?'selected':''}>充值成功</option></select></div></td></tr>`;
+  }).join('');
+}
+async function searchOrders() { renderOrderTable($('orderSearchInput').value.trim()); }
+function viewPaymentScreenshot(orderId) {
+  const order = (appData.orders||[]).find(o=>o.id===orderId);
+  if(!order || !order.payment_screenshot) { showToast('暂无凭证'); return; }
+  $('modalImage').src = order.payment_screenshot; $('modalOverlay').style.display = 'flex';
+}
+function closeModal() { $('modalOverlay').style.display = 'none'; }
+async function changeOrderStatus(orderId, newStatus) {
+  if(!newStatus) return;
+  try { await callProxy('updateOrderStatus', { orderId, status: newStatus }); const order = (appData.orders||[]).find(o=>o.id===orderId); if(order) order.status = newStatus; renderOrderTable($('orderSearchInput').value.trim()); showToast('✅ 订单状态已更新'); }
+  catch(err) { showToast('❌ 更新失败：' + err.message); }
+}
+function loadQRSettings() {
+  const w = appData.settings.wechat_qr; const a = appData.settings.alipay_qr;
+  const we = $('wechatQRPreview'), weS = $('wechatQRStatus');
+  if(w) { we.src = w; we.style.display = 'inline-block'; weS.textContent = '已设置'; } else { we.style.display = 'none'; weS.textContent = '未设置'; }
+  const al = $('alipayQRPreview'), alS = $('alipayQRStatus');
+  if(a) { al.src = a; al.style.display = 'inline-block'; alS.textContent = '已设置'; } else { al.style.display = 'none'; alS.textContent = '未设置'; }
+}
+async function saveQRCode(type, input) {
+  const file = input.files[0];
+  if(!file) return;
+  if(!/^image\//.test(file.type)) { showToast('仅支持图片文件'); input.value=''; return; }
+  if(file.size > 3*1024*1024) { showToast('图片不能超过3MB'); input.value=''; return; }
+  try {
+    const url = await uploadFile(file, 'qrcodes');
+    const field = type==='wechat' ? 'wechat_qr' : 'alipay_qr';
+    await callProxy('saveSettings', { [field]: url });
+    appData.settings[field] = url; loadQRSettings(); updateQRDisplay(); showToast('✅ 收款码已更新');
+  } catch(err) { showToast('❌ 上传失败：'+err.message); }
+  input.value = '';
+}
+function loadServiceSettings() { $('csNameInput').value = appData.settings.cs_name || ''; $('csLinkInput').value = appData.settings.cs_link || ''; }
+async function saveServiceSettings() {
+  const name = $('csNameInput').value.trim() || '在线客服';
+  const link = $('csLinkInput').value.trim() || '#';
+  try { await callProxy('saveSettings', { cs_name: name, cs_link: link }); appData.settings.cs_name = name; appData.settings.cs_link = link; applySettings(); showToast('✅ 客服设置已保存'); }
+  catch(err) { showToast('❌ 保存失败'); }
+}
+function loadSiteSettings() {
+  $('siteNameInput').value = appData.settings.site_name || '';
+  $('announcementInput').value = appData.settings.announcement || '';
+  $('adminPwdInput').value = '';
+  const logo = $('logoPreview'); if(appData.settings.logo) { logo.src = appData.settings.logo; logo.style.display = 'inline-block'; } else { logo.style.display = 'none'; }
+  const banner = $('bannerPreview'); if(appData.settings.banner) { banner.src = appData.settings.banner; banner.style.display = 'inline-block'; } else { banner.style.display = 'none'; }
+}
+async function saveSiteImage(type, input) {
+  const file = input.files[0];
+  if(!file) return;
+  if(!/^image\//.test(file.type)) { showToast('仅支持图片文件'); input.value=''; return; }
+  if(file.size > 5*1024*1024) { showToast('图片不能超过5MB'); input.value=''; return; }
+  try {
+    const url = await uploadFile(file, 'site');
+    const field = type==='logo' ? 'logo' : 'banner';
+    await callProxy('saveSettings', { [field]: url });
+    appData.settings[field] = url; loadSiteSettings(); applySettings(); showToast('✅ 图片已更新');
+  } catch(err) { showToast('❌ 上传失败：'+err.message); }
+  input.value = '';
+}
+async function saveSiteSettings() {
+  const siteName = $('siteNameInput').value.trim() || '充值中心';
+  const announcement = $('announcementInput').value.trim() || '欢迎使用充值服务';
+  const newPwd = $('adminPwdInput').value;
+  const updateObj = { site_name: siteName, announcement };
+  if(newPwd) { if(newPwd.length < 6) { showToast('密码至少6位'); return; } updateObj.admin_password = newPwd; }
+  try { await callProxy('saveSettings', updateObj); appData.settings.site_name = siteName; appData.settings.announcement = announcement; applySettings(); loadSiteSettings(); showToast('✅ 网站设置已保存'); }
+  catch(err) { showToast('❌ 保存失败'); }
+}
+let refreshIntervalId = null; let pageVisible = true;
+document.addEventListener('visibilitychange', () => { pageVisible = !document.hidden; });
+function startAutoRefresh() {
+  if(refreshIntervalId) clearInterval(refreshIntervalId);
+  refreshIntervalId = setInterval(async function() {
+    if(!pageVisible) return;
+    const adminPage = $('pageAdmin');
+    if(adminPage && adminPage.classList.contains('active')) {
+      const ordersPanel = $('adminPanelOrders');
+      if(ordersPanel && ordersPanel.classList.contains('active')) {
+        try { const orders = await callProxy('getAllOrders'); if(orders) { appData.orders = orders; renderOrderTable($('orderSearchInput').value.trim()); } } catch(e) {}
+      }
+    }
+  }, 8000);
+}
+function bindEvents() {
+  $('btnHome').addEventListener('click', goToHome);
+  $('btnQuery').addEventListener('click', showQueryModal);
+  $('btnBackHome').addEventListener('click', goToHome);
+  $('btnClaim').addEventListener('click', claimVoucher);
+  $('btnNext').addEventListener('click', goToRecharge);
+  $('submitOrderBtn').addEventListener('click', submitOrder);
+  $('uploadArea').addEventListener('click', () => $('uploadInput').click());
+  $('uploadInput').addEventListener('change', function(e) { handleUpload(this); });
+  document.querySelectorAll('#amountOptions .amount-card').forEach(card => { card.addEventListener('click', function() { selectAmount(this); }); });
+  document.querySelectorAll('.qr-tab').forEach(btn => { btn.addEventListener('click', function() { switchPayment(this.dataset.method, this); }); });
+  $('queryModal').addEventListener('click', function(e){ if(e.target===this) closeQueryModal(); });
+  $('modalOverlay').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+  $('btnCloseQuery').addEventListener('click', closeQueryModal);
+  $('btnCloseModal').addEventListener('click', closeModal);
+  $('btnQuerySubmit').addEventListener('click', queryOrders);
+  $('queryPhone').addEventListener('keydown', e=>{ if(e.key==='Enter') queryOrders(); });
+  $('btnAdminLogin').addEventListener('click', adminLogin);
+  $('adminPasswordInput').addEventListener('keydown', e=>{ if(e.key==='Enter') adminLogin(); });
+  $('btnAdminLogout').addEventListener('click', adminLogout);
+  document.querySelectorAll('.admin-tab').forEach(btn => { btn.addEventListener('click', function(){ switchAdminTab(this.dataset.tab, this); }); });
+  $('btnSearchOrders').addEventListener('click', searchOrders);
+  $('orderSearchInput').addEventListener('keydown', e=>{ if(e.key==='Enter') searchOrders(); });
+  $('orderTableBody').addEventListener('click', function(e){ const btn = e.target.closest('button[data-act="view"]'); if(btn) viewPaymentScreenshot(btn.dataset.id); });
+  $('orderTableBody').addEventListener('change', function(e){ const sel = e.target.closest('select[data-act="status"]'); if(sel) changeOrderStatus(sel.dataset.id, sel.value); });
+  $('btnWechatQR').addEventListener('click', ()=>$('wechatQRInput').click());
+  $('btnAlipayQR').addEventListener('click', ()=>$('alipayQRInput').click());
+  $('wechatQRInput').addEventListener('change', function(e){ saveQRCode('wechat', this); });
+  $('alipayQRInput').addEventListener('change', function(e){ saveQRCode('alipay', this); });
+  $('btnSaveService').addEventListener('click', saveServiceSettings);
+  $('btnLogo').addEventListener('click', ()=>$('logoInput').click());
+  $('btnBanner').addEventListener('click', ()=>$('bannerInput').click());
+  $('logoInput').addEventListener('change', function(e){ saveSiteImage('logo', this); });
+  $('bannerInput').addEventListener('change', function(e){ saveSiteImage('banner', this); });
+  $('btnSaveSite').addEventListener('click', saveSiteSettings);
+  ['inputPhone','queryPhone'].forEach(id=>{ $(id).addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,11); }); });
+}
+window.addEventListener('DOMContentLoaded', function() {
+  initSiteNameClick(); bindEvents();
+  loadAllData().then(() => { startAutoRefresh(); if(window.location.hash === '#admin') { goToAdmin(); } console.log('✅ 充值系统已启动（运营版）'); });
+});
+</script>
+</body>
+</html>
