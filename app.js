@@ -39,21 +39,49 @@ async function uploadFile(file, folder) {
 }
 
 // ---------- 全局数据 ----------
+// 注意：前端使用驼峰字段（与界面一致），保存到后端时由 saveSettings 做映射
 let appData = {
   settings: {
-    site_name: '充值中心',
+    siteName: '充值中心',
     logo: '',
     banner: '',
     announcement: '欢迎使用充值服务，代金券限量发放中！',
-    wechat_qr: '',
-    alipay_qr: '',
-    cs_name: '在线客服',
-    cs_link: '#'
+    wechatQR: '',
+    alipayQR: '',
+    customerServiceName: '在线客服',
+    customerServiceLink: '#'
   },
   orders: [],
   currentPhone: '',
   currentVoucherCode: ''
 };
+
+// 后端 settings 字段(蛇形) <-> 前端(settings 驼峰) 映射
+const SETTINGS_MAP = {
+  site_name: 'siteName',
+  logo: 'logo',
+  banner: 'banner',
+  announcement: 'announcement',
+  wechat_qr: 'wechatQR',
+  alipay_qr: 'alipayQR',
+  cs_name: 'customerServiceName',
+  cs_link: 'customerServiceLink'
+};
+function fromBackendSettings(s) {
+  if (!s) return {};
+  const out = {};
+  for (const [bk, fk] of Object.entries(SETTINGS_MAP)) {
+    if (s[bk] !== undefined && s[bk] !== null) out[fk] = s[bk];
+  }
+  return out;
+}
+function toBackendSettings(obj) {
+  const out = {};
+  for (const [bk, fk] of Object.entries(SETTINGS_MAP)) {
+    if (obj[fk] !== undefined) out[bk] = obj[fk];
+  }
+  return out;
+}
 
 // ---------- 工具函数 ----------
 function formatPhone(p) { return (p && p.length===11) ? p.substring(0,3)+'****'+p.substring(7) : (p||''); }
@@ -81,7 +109,7 @@ async function loadAllData() {
         try {
           const settingsData = await callProxy('getSettings');
           if (settingsData) {
-            appData.settings = { ...appData.settings, ...settingsData };
+            appData.settings = { ...appData.settings, ...fromBackendSettings(settingsData) };
             applySettings();
           }
         } catch(e) {
@@ -110,24 +138,24 @@ function saveSession() {
 
 function applySettings() {
   const s = appData.settings;
-  $('navSiteName').textContent = s.site_name || '充值中心';
-  document.title = s.site_name || '充值中心';
+  $('navSiteName').textContent = s.siteName || '充值中心';
+  document.title = s.siteName || '充值中心';
   $('announcementText').textContent = s.announcement || '';
   const lp = $('navLogoPlaceholder');
-  if(s.logo) { lp.innerHTML = '<img class="logo-img" src="'+s.logo+'" style="width:38px;height:38px;border-radius:8px;object-fit:contain;">'; } else { lp.innerHTML = '⛽'; }
+  if(s.logo) { lp.innerHTML = '<img src="'+s.logo+'" style="width:38px;height:38px;border-radius:8px;object-fit:contain;">'; } else { lp.textContent = '⛽'; }
   const bw = $('homeBanner');
-  if(s.banner) { bw.innerHTML = '<img src="'+s.banner+'" alt="Banner">'; } else { bw.innerHTML = '<div class="banner-placeholder"><div class="bp-title">🎉 充值特惠 · 代金券限时领</div><div class="bp-sub">充值即享优惠 · 代金券限量发放中，先到先得</div></div>'; }
+  if(s.banner) { bw.innerHTML = '<img src="'+s.banner+'" alt="Banner">'; } else { bw.innerHTML = '<span class="banner-placeholder">🎉 品牌充值 · 代金券限时领</span>'; }
   const cl = $('csLinkResult');
-  cl.textContent = '💬 联系' + (s.cs_name||'在线客服');
-  cl.href = s.cs_link||'#';
-  if(!s.cs_link || s.cs_link==='#') { cl.setAttribute('onclick','showToast("客服链接暂未设置");return false;'); } else { cl.removeAttribute('onclick'); }
+  cl.textContent = '💬 联系' + (s.customerServiceName||'在线客服');
+  cl.href = s.customerServiceLink||'#';
+  if(!s.customerServiceLink || s.customerServiceLink==='#') { cl.setAttribute('onclick','showToast("客服链接暂未设置");return false;'); } else { cl.removeAttribute('onclick'); }
   updateQRDisplay();
 }
 
 function updateQRDisplay() {
   const qd = $('qrDisplay');
   const method = qd.getAttribute('data-payment') || 'wechat';
-  const qrData = method==='wechat' ? appData.settings.wechat_qr : appData.settings.alipay_qr;
+  const qrData = method==='wechat' ? appData.settings.wechatQR : appData.settings.alipayQR;
   if(qrData) { qd.innerHTML = '<img src="'+qrData+'" alt="收款码" style="width:100%;height:100%;object-fit:contain;">'; } else { qd.innerHTML = '<span class="qr-placeholder">请在后台设置'+(method==='wechat'?'微信':'支付宝')+'收款码</span>'; }
 }
 
@@ -141,7 +169,8 @@ function showPage(id) {
 function goToHome() {
   showPage('pageHome');
   $('inputPhone').value = '';
-  $('voucherStatusArea').innerHTML = '<span style="color:#999;font-size:13px;">请输入手机号领取</span>';
+  clearPhoneError();
+  $('voucherStatusArea').innerHTML = '<span style="color:var(--text-light);font-size:13px;">🟡 等待操作中…</span>';
   $('btnNext').disabled = true;
   appData.currentPhone = ''; appData.currentVoucherCode = '';
   saveSession();
@@ -178,16 +207,39 @@ function initSiteNameClick() {
   });
 }
 
+// ---------- 手机号校验 ----------
+function showPhoneError(msg) {
+  var err = $('phoneError');
+  var input = $('inputPhone');
+  err.textContent = msg || '请输入有效的11位手机号码';
+  err.classList.add('visible');
+  input.classList.add('input-error');
+}
+function clearPhoneError() {
+  var err = $('phoneError');
+  var input = $('inputPhone');
+  err.classList.remove('visible');
+  input.classList.remove('input-error');
+}
+
 // ---------- 领券 ----------
 async function claimVoucher() {
   const phoneInput = $('inputPhone');
-  const phone = phoneInput.value.replace(/\D/g,'').trim();
-  if(!/^1[3-9]\d{9}$/.test(phone)) { showToast('请输入有效的11位手机号码'); phoneInput.focus(); return; }
+  const phone = phoneInput.value.trim().replace(/\D/g,'');
+  phoneInput.value = phone;
+
+  if (phone.length !== 11 || phone[0] !== '1') {
+    showPhoneError('请输入有效的11位手机号码（如 13800138000）');
+    phoneInput.focus();
+    return;
+  }
+  clearPhoneError();
+
   const statusArea = $('voucherStatusArea');
   const btnClaim = $('btnClaim');
   const btnNext = $('btnNext');
   btnClaim.disabled = true; btnClaim.textContent = '⏳ 正在查询…';
-  statusArea.innerHTML = '<span style="color:#f09d00;font-size:13px;">🟡 正在查询…</span>';
+  statusArea.innerHTML = '<span style="color:var(--warning);font-size:13px;">🟡 正在查询…</span>';
   btnNext.disabled = true;
   try {
     const existing = await callProxy('getVoucher', { phone });
@@ -201,14 +253,14 @@ async function claimVoucher() {
     appData.currentPhone = phone;
     appData.currentVoucherCode = voucherCode;
     saveSession();
-    statusArea.innerHTML = '<span style="color:#2e7d32;font-size:13px;font-weight:600;">🟢 查询完成</span>';
+    statusArea.innerHTML = '<span style="color:var(--success);font-size:13px;font-weight:700;">🟢 查询完成</span>';
     btnClaim.disabled = false; btnClaim.textContent = '🎫 立即领取电子代金券';
     btnNext.disabled = false;
     showToast('✅ 代金券领取成功！');
   } catch(err) {
     console.error(err);
     showToast('❌ 领取失败：' + err.message);
-    statusArea.innerHTML = '<span style="color:#c62828;font-size:13px;">🔴 查询失败，请重试</span>';
+    statusArea.innerHTML = '<span style="color:#EF4444;font-size:13px;">🔴 查询失败，请重试</span>';
     btnClaim.disabled = false; btnClaim.textContent = '🎫 立即领取电子代金券';
   }
 }
@@ -305,40 +357,8 @@ function showResultPage(order) {
   showPage('pageResult');
 }
 
-// ---------- 订单查询（前台） ----------
-function showQueryModal() {
-  $('queryModal').style.display = 'flex';
-  $('queryPhone').value = '';
-  $('queryResult').innerHTML = '';
-}
-function closeQueryModal() { $('queryModal').style.display = 'none'; }
-async function queryOrders() {
-  const phone = $('queryPhone').value.replace(/\D/g,'').trim();
-  if(!phone) { showToast('请输入手机号'); return; }
-  const resultDiv = $('queryResult');
-  resultDiv.innerHTML = '<span style="color:#f09d00;">⏳ 查询中…</span>';
-  try {
-    const orders = await callProxy('getOrdersByPhone', { phone });
-    if(!orders || orders.length === 0) {
-      resultDiv.innerHTML = '<p style="color:#999;text-align:center;">暂无订单</p>';
-      return;
-    }
-    const statusMap = {'processing':'🟡 处理中', 'failed':'🔴 失败', 'success':'🟢 成功'};
-    let html = '<div style="max-height:300px;overflow-y:auto;">';
-    orders.forEach(o => {
-      html += `<div class="order-item">
-        <div class="order-id">📦 ${escapeHtml(o.id)}</div>
-        <div>金额：¥${o.actual_pay}　<span class="order-status">${statusMap[o.status]||escapeHtml(o.status)}</span></div>
-        <div style="font-size:12px;color:#999;">${(o.created_at&&!isNaN(new Date(o.created_at)))?new Date(o.created_at).toLocaleString():''}</div>
-      </div>`;
-    });
-    html += '</div>';
-    resultDiv.innerHTML = html;
-  } catch(err) {
-    console.error(err);
-    resultDiv.innerHTML = '<p style="color:#c62828;">❌ 查询失败：' + escapeHtml(err.message) + '</p>';
-  }
-}
+// ---------- 订单查询（前台，复用后台查询接口） ----------
+function showQueryModal() { showToast('如需查询订单请联系客服'); }
 
 // ---------- 后台管理 ----------
 function goToAdmin() {
@@ -405,7 +425,7 @@ function renderOrderTable(filterText) {
     orders = orders.filter(o => (o.id||'').toLowerCase().includes(filterText) || (o.phone||'').includes(filterText) || (o.voucher_code && o.voucher_code.toLowerCase().includes(filterText)));
   }
   if(!orders.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">暂无订单</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-light);padding:16px;">暂无订单</td></tr>';
     return;
   }
   const statusMap = {'processing':'🟡 处理中','failed':'🔴 失败','success':'🟢 成功'};
@@ -422,7 +442,8 @@ function renderOrderTable(filterText) {
       <td><span class="badge ${badgeClass}">${statusText}</span></td>
       <td>
         <div class="order-actions">
-          <button class.id)}" style="font-size:11px;padding:5px;">
+          <button class="btn btn-sm btn-outline" style="font-size:11px;padding:5px 10px;" data-act="view" data-id="${escapeHtml(o.id)}">查看凭证</button>
+          <select data-act="status" data-id="${escapeHtml(o.id)}" style="font-size:11px;padding:5px;border-radius:6px;border:1px solid var(--border);">
             <option value="">修改状态</option>
             <option value="processing" ${o.status==='processing'?'selected':''}>处理中</option>
             <option value="failed" ${o.status==='failed'?'selected':''}>充值失败</option>
@@ -434,7 +455,7 @@ function renderOrderTable(filterText) {
   }).join('');
 }
 
-async function searchOrders() {
+function searchOrders() {
   renderOrderTable($('orderSearchInput').value.trim());
 }
 
@@ -459,8 +480,8 @@ async function changeOrderStatus(orderId, newStatus) {
 }
 
 function loadQRSettings() {
-  const w = appData.settings.wechat_qr;
-  const a = appData.settings.alipay_qr;
+  const w = appData.settings.wechatQR;
+  const a = appData.settings.alipayQR;
   const we = $('wechatQRPreview'), weS = $('wechatQRStatus');
   if(w) { we.src = w; we.style.display = 'inline-block'; weS.textContent = '已设置'; } else { we.style.display = 'none'; weS.textContent = '未设置'; }
   const al = $('alipayQRPreview'), alS = $('alipayQRStatus');
@@ -474,8 +495,8 @@ async function saveQRCode(type, input) {
   if(file.size > 3*1024*1024) { showToast('图片不能超过3MB'); input.value=''; return; }
   try {
     const url = await uploadFile(file, 'qrcodes');
-    const field = type==='wechat' ? 'wechat_qr' : 'alipay_qr';
-    await callProxy('saveSettings', { [field]: url });
+    const field = type==='wechat' ? 'wechatQR' : 'alipayQR';
+    await callProxy('saveSettings', toBackendSettings({ [field]: url }));
     appData.settings[field] = url;
     loadQRSettings();
     updateQRDisplay();
@@ -485,24 +506,24 @@ async function saveQRCode(type, input) {
 }
 
 function loadServiceSettings() {
-  $('csNameInput').value = appData.settings.cs_name || '';
-  $('csLinkInput').value = appData.settings.cs_link || '';
+  $('csNameInput').value = appData.settings.customerServiceName || '';
+  $('csLinkInput').value = appData.settings.customerServiceLink || '';
 }
 
 async function saveServiceSettings() {
   const name = $('csNameInput').value.trim() || '在线客服';
   const link = $('csLinkInput').value.trim() || '#';
   try {
-    await callProxy('saveSettings', { cs_name: name, cs_link: link });
-    appData.settings.cs_name = name;
-    appData.settings.cs_link = link;
+    await callProxy('saveSettings', toBackendSettings({ customerServiceName: name, customerServiceLink: link }));
+    appData.settings.customerServiceName = name;
+    appData.settings.customerServiceLink = link;
     applySettings();
     showToast('✅ 客服设置已保存');
   } catch(err) { showToast('❌ 保存失败'); }
 }
 
 function loadSiteSettings() {
-  $('siteNameInput').value = appData.settings.site_name || '';
+  $('siteNameInput').value = appData.settings.siteName || '';
   $('announcementInput').value = appData.settings.announcement || '';
   $('adminPwdInput').value = '';
   const logo = $('logoPreview');
@@ -519,7 +540,7 @@ async function saveSiteImage(type, input) {
   try {
     const url = await uploadFile(file, 'site');
     const field = type==='logo' ? 'logo' : 'banner';
-    await callProxy('saveSettings', { [field]: url });
+    await callProxy('saveSettings', toBackendSettings({ [field]: url }));
     appData.settings[field] = url;
     loadSiteSettings();
     applySettings();
@@ -532,14 +553,14 @@ async function saveSiteSettings() {
   const siteName = $('siteNameInput').value.trim() || '充值中心';
   const announcement = $('announcementInput').value.trim() || '欢迎使用充值服务';
   const newPwd = $('adminPwdInput').value;
-  const updateObj = { site_name: siteName, announcement };
+  const updateObj = { siteName, announcement };
   if(newPwd) {
     if(newPwd.length < 6) { showToast('密码至少6位'); return; }
-    updateObj.admin_password = newPwd;
+    updateObj.admin_password = newPwd; // 后端 saveSettings 会自动哈希
   }
   try {
-    await callProxy('saveSettings', updateObj);
-    appData.settings.site_name = siteName;
+    await callProxy('saveSettings', toBackendSettings(updateObj));
+    appData.settings.siteName = siteName;
     appData.settings.announcement = announcement;
     applySettings();
     loadSiteSettings();
@@ -575,7 +596,7 @@ function startAutoRefresh() {
 // ---------- 事件绑定（全部使用 addEventListener，不依赖内联 onclick） ----------
 function bindEvents() {
   $('btnHome').addEventListener('click', goToHome);
-  $('btnQuery').addEventListener('click', showQueryModal);
+  $('btnQuery') && $('btnQuery').addEventListener('click', showQueryModal);
   $('btnBackHome').addEventListener('click', goToHome);
   $('btnClaim').addEventListener('click', claimVoucher);
   $('btnNext').addEventListener('click', goToRecharge);
@@ -589,13 +610,8 @@ function bindEvents() {
     btn.addEventListener('click', function() { switchPayment(this.dataset.method, this); });
   });
 
-  $('queryModal').addEventListener('click', function(e){ if(e.target===this) closeQueryModal(); });
   $('modalOverlay').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
-  $('btnCloseQuery').addEventListener('click', closeQueryModal);
   $('btnCloseModal').addEventListener('click', closeModal);
-
-  $('btnQuerySubmit').addEventListener('click', queryOrders);
-  $('queryPhone').addEventListener('keydown', e=>{ if(e.key==='Enter') queryOrders(); });
 
   $('btnAdminLogin').addEventListener('click', adminLogin);
   $('adminPasswordInput').addEventListener('keydown', e=>{ if(e.key==='Enter') adminLogin(); });
@@ -626,8 +642,8 @@ function bindEvents() {
   $('bannerInput').addEventListener('change', function(e){ saveSiteImage('banner', this); });
   $('btnSaveSite').addEventListener('click', saveSiteSettings);
 
-  ['inputPhone','queryPhone'].forEach(id=>{
-    $(id).addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,11); });
+  ['inputPhone'].forEach(id=>{
+    $(id).addEventListener('input', function(){ this.value = this.value.replace(/\D/g,'').slice(0,11); clearPhoneError(); });
   });
 }
 
