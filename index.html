@@ -1,303 +1,485 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>充值中心</title>
-<style>
-:root{--gd:#E60012;--gm:#0096D6;--gl:#E6F5FF;--gold:#E60012;--gol:#E6F5FF;--gb:#0096D6;--red:#E60012;--rl:#fde8ea;--bg:#f4f6fb;--w:#fff;--t:#1A3A6D;--ts:#1A3A6D;--tl:#94a3b8;--b:#e2e8f0;--s:0 2px 12px rgba(230,0,18,0.08);--sl:0 8px 32px rgba(230,0,18,0.12);--r:14px;--rs:10px;--tr:0.25s cubic-bezier(0.4,0,0.2,1);--fs:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;min-height:100%;margin:0;padding:0;overflow-x:hidden}
-html{font-size:17px}
-body{font-family:var(--fs);background:var(--bg);color:var(--t);-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;font-size:1rem;line-height:1.55}
-.app-container{width:100%;max-width:100%;min-height:100vh;background:var(--bg);position:relative;overflow-x:hidden;padding:0 env(safe-area-inset-left) calc(20px + env(safe-area-inset-bottom)) env(safe-area-inset-right)}
-.nav-header{background:var(--gd);padding:18px 20px;padding-top:calc(18px + env(safe-area-inset-top));display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
-.nav-header .logo-area{display:flex;align-items:center;gap:12px;flex-shrink:0}
-.nav-header .logo-placeholder{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;flex-shrink:0}
-.nav-header .site-name{color:#fff;font-size:20px;font-weight:600;letter-spacing:.5px;white-space:nowrap;user-select:none;cursor:pointer}
-.nav-header .nav-actions{margin-left:auto;display:flex;gap:10px}
-.nav-header .btn-nav{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:10px 17px;border-radius:22px;font-size:15px;cursor:pointer;transition:var(--tr);white-space:nowrap;font-family:var(--fs)}
-.nav-header .btn-nav:active{background:rgba(255,255,255,0.28);transform:scale(.96)}
-.page{display:none;padding:18px 16px calc(24px + env(safe-area-inset-bottom));animation:fadeSlideIn .3s ease}
-.page.active{display:block}
-#pageHome{min-height:calc(100vh - 84px - env(safe-area-inset-top) - env(safe-area-inset-bottom));display:flex;flex-direction:column;justify-content:flex-start;gap:18px;padding-top:24px}
-@keyframes fadeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.banner-wrap{border-radius:var(--r);overflow:hidden;margin-bottom:18px;box-shadow:var(--s);background:linear-gradient(135deg,#E6F5FF,#FFFFFF);min-height:150px;display:flex;align-items:center;justify-content:center}
-.banner-wrap img{width:100%;display:block;object-fit:cover;max-height:220px}
-.banner-placeholder{color:#1A3A6D;text-align:center;padding:34px 24px;letter-spacing:1px}
-.banner-placeholder .bp-title{font-size:22px;font-weight:700}
-.banner-placeholder .bp-sub{font-size:14px;margin-top:10px;opacity:.8;font-weight:400}
-.announcement-bar{background:#2DAEAA;border:1px solid #2DAEAA;border-radius:var(--rs);padding:14px 18px;margin-bottom:18px;font-size:16px;color:#fff;display:flex;align-items:center;gap:10px;animation:pulseBorder 2s infinite}
-@keyframes pulseBorder{0%,100%{border-color:#2DAEAA}50%{border-color:#1e8e8a}}
-.card{background:var(--w);border-radius:var(--r);padding:24px 20px;margin-bottom:18px;box-shadow:var(--s);text-align:center}
-.card-title{font-size:18px;font-weight:600;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #f0f0f0;display:flex;align-items:center;gap:8px}
-.card-title .dot{width:10px;height:10px;border-radius:50%;background:var(--gm);flex-shrink:0}
-.input-group{margin-bottom:18px}
-.input-group label{display:block;font-size:16px;font-weight:500;color:var(--ts);margin-bottom:10px}
-.input-group input{width:100%;padding:17px 18px;border:2px solid var(--b);border-radius:var(--rs);font-size:18px;font-family:var(--fs);transition:var(--tr);background:#FFFFFF;outline:none}
-.input-group input::placeholder{color:#A0A0A0}
-.input-group input:focus{border-color:var(--gm);background:#fff;box-shadow:0 0 0 3px rgba(0,150,214,0.12)}
-.input-group label{color:#1A3A6D}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:17px 36px;border-radius:26px;font-size:18px;font-weight:600;border:none;cursor:pointer;transition:var(--tr);font-family:var(--fs);width:auto}
-.btn:active{transform:scale(.97);opacity:.9}
-.btn-primary{background:linear-gradient(135deg,#0096D6,#1A3A6D);color:#fff;box-shadow:0 4px 14px rgba(0,150,214,0.3)}
-.btn-gold{background:linear-gradient(135deg,#0096D6,#1A3A6D);color:#fff;box-shadow:0 4px 14px rgba(0,150,214,0.35);font-size:19px;letter-spacing:1px}
-.btn-outline{background:#fff;color:var(--gm);border:2px solid var(--gm)}
-.btn-sm{padding:10px 20px;font-size:15px;border-radius:20px;width:auto}
-.btn:disabled{opacity:.5;pointer-events:none}
-.status-badge{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;font-size:15px}
-.status-processing{background:#fff8e1;color:#f09d00;border:1px solid #ffe0a0}
-.status-success{background:#E6F5FF;color:#0096D6;border:1px solid #bfe6f5}
-.status-failed{background:#ffebee;color:#c62828;border:1px solid #ffcdd2}
-.amount-options{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
-.amount-card{border:2px solid var(--b);border-radius:var(--rs);padding:22px 12px;text-align:center;cursor:pointer;background:#fafbfc;user-select:none}
-.amount-card.selected{border-color:var(--gb);background:var(--gol)}
-.amount-card .amount-main{font-size:30px;font-weight:700}
-.amount-card .amount-discount{font-size:15px;color:var(--gold);margin-top:8px}
-.calc-summary{background:#f9fafb;border-radius:var(--rs);padding:18px;margin-bottom:18px;border:1px dashed #dde}
-.calc-row{display:flex;justify-content:space-between;padding:10px 0;font-size:17px}
-.calc-row.total{border-top:1px solid #e8e8e8;margin-top:10px;padding-top:14px;font-weight:700;font-size:21px;color:var(--gd)}
-.qr-section{text-align:center;padding:14px 0}
-.qr-tabs{display:flex;gap:12px;margin-bottom:16px;justify-content:center}
-.qr-tab{padding:12px 24px;border-radius:20px;border:2px solid var(--b);background:#fff;cursor:pointer;font-size:16px}
-.qr-tab.active{border-color:var(--gm);background:var(--gl);color:var(--gd);font-weight:600}
-.qr-img-wrap{width:220px;height:220px;margin:0 auto;border-radius:var(--rs);overflow:hidden;border:2px solid #eee;background:#fff;display:flex;align-items:center;justify-content:center}
-.upload-area{border:2px dashed #d0d5dd;border-radius:var(--rs);padding:28px;text-align:center;cursor:pointer;background:#fafbfc}
-.upload-area:active{background:#f0f4f0}
-.upload-area img{max-width:100%;max-height:220px;border-radius:6px;margin-top:8px}
-.upload-area.has-image{border-color:#4caf50;background:#f9fdf9}
-#uploadInput{display:none}
-.result-icon{font-size:64px;text-align:center;margin:20px 0;animation:bounceIn .5s ease}
-@keyframes bounceIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.05)}70%{transform:scale(.95)}100%{transform:scale(1);opacity:1}}
-.info-table{width:100%;font-size:16px;border-collapse:collapse}
-.info-table td{padding:12px 14px;border-bottom:1px solid #f5f5f5}
-.info-table td:first-child{color:var(--ts);width:34%}
-.cs-link{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;background:#fff;border-radius:25px;color:var(--gm);font-weight:600;text-decoration:none;border:2px solid var(--gm);margin-top:12px;font-size:16px}
-.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:999;display:flex;align-items:center;justify-content:center}
-.modal-dialog{background:#fff;border-radius:var(--r);padding:24px;max-width:92vw;max-height:88vh;overflow-y:auto;box-shadow:var(--sl);width:420px;position:relative}
-.modal-close{position:absolute;top:12px;right:16px;background:0 0;border:none;font-size:24px;cursor:pointer;color:#999}
-.admin-container{max-width:800px;width:100%;padding:16px}
-.admin-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#fff;border-radius:25px;padding:6px;box-shadow:var(--s)}
-.admin-tab{flex:1;min-width:74px;padding:12px 12px;border-radius:20px;border:none;background:0 0;cursor:pointer;font-size:14px}
-.admin-tab.active{background:var(--gd);color:#fff;font-weight:600}
-.admin-panel{display:none;overflow-x:auto}
-.admin-panel.active{display:block;animation:fadeSlideIn .3s ease}
-.order-table{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:var(--rs);overflow:hidden;box-shadow:var(--s)}
-.order-table th,.order-table td{padding:14px 12px;text-align:left;border-bottom:1px solid #eee}
-.order-table th{background:#f5f7f6;font-weight:600;color:var(--ts);font-size:13px}
-.badge{display:inline-block;padding:5px 14px;border-radius:12px;font-size:13px;font-weight:500}
-.badge-processing{background:#fff8e1;color:#e6a000}
-.badge-failed{background:#ffebee;color:#c62828}
-.badge-success{background:#E6F5FF;color:#0096D6}
-.search-box{display:flex;gap:10px;margin-bottom:16px}
-.search-box input{flex:1;padding:14px 18px;border:2px solid var(--b);border-radius:25px;font-size:16px}
-.settings-row{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid #f0f0f0;flex-wrap:wrap;gap:12px}
-.settings-row input[type="text"],.settings-row input[type="url"],.settings-row input[type="password"]{flex:1;min-width:180px;padding:14px 16px;border:2px solid var(--b);border-radius:20px;font-size:16px}
-.img-upload-btn{padding:11px 18px;border-radius:20px;background:#f0f4f1;border:1px dashed #aaa;cursor:pointer;font-size:14px}
-.settings-preview-img{width:64px;height:64px;object-fit:contain;border-radius:6px;border:1px solid #ddd}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:25px;font-size:14px;z-index:2000;animation:toastIn .3s ease,toastOut .3s ease 1.8s forwards;max-width:90vw}
-@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(-50%) translateY(-20px)}}
-.loading-mask{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;z-index:9999;font-size:18px;color:var(--gm);flex-direction:column;gap:10px}
-.spinner{width:40px;height:40px;border:4px solid #e0e0e0;border-top-color:var(--gm);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.error-container{text-align:center;color:#c62828}
-.error-container .big-icon{font-size:48px}
-.error-container .retry-btn{margin-top:16px;padding:10px 30px;border-radius:20px;border:none;background:#E60012;color:#fff;font-size:16px;cursor:pointer}
-.order-item{border-bottom:1px solid #eee;padding:10px 0;font-size:14px}
-.order-item:last-child{border-bottom:none}
-.order-item .order-id{font-weight:600;color:#1A3A6D}
-.order-item .order-status{float:right}
-.order-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.order-actions select{font-size:11px;padding:5px}
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>充值中心</title>
+    <style>
+        :root {
+            --primary: #2D8CFF;
+            --primary-deep: #2563EB;
+            --primary-light: #EAF5FF;
+            --bg-page: #F7FAFC;
+            --bg-card: #FFFFFF;
+            --cta: #FF9800;
+            --cta-deep: #F57C00;
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --text-main: #1F2937;
+            --text-sub: #6B7280;
+            --text-light: #9CA3AF;
+            --border: #E5E7EB;
+            --shadow: 0 4px 24px rgba(45, 140, 255, 0.10);
+            --shadow-lg: 0 12px 40px rgba(45, 140, 255, 0.16);
+            --radius: 14px;
+            --radius-sm: 10px;
+            --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: var(--font-stack);
+            background: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            -webkit-font-smoothing: antialiased;
+        }
+        .app-container { width:100%; max-width:450px; min-height: 100vh; background: var(--bg-page); position: relative; overflow-x: hidden; }
+
+        .nav-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.35);
+        }
+        .nav-header .logo-area { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+        .nav-header .logo-placeholder {
+            width:38px; height:38px; border-radius:10px;
+            background: rgba(255,255,255,0.25); backdrop-filter: blur(4px);
+            display:flex; align-items:center; justify-content:center;
+            font-size:20px; color:#fff; flex-shrink:0;
+        }
+        .nav-header .site-name {
+            color:#fff; font-size:17px; font-weight:800;
+            letter-spacing:0.5px; white-space:nowrap; user-select: none; cursor: pointer;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.10);
+        }
+        .nav-header .nav-actions { margin-left:auto; display:flex; gap:8px; }
+        .nav-header .btn-nav {
+            background: rgba(255,255,255,0.22); color:#fff;
+            border:1px solid rgba(255,255,255,0.35);
+            padding:7px 13px; border-radius:20px; font-size:13px;
+            cursor:pointer; transition:var(--transition); white-space:nowrap;
+            font-family:var(--font-stack); font-weight:600;
+        }
+        .nav-header .btn-nav:active { background: rgba(255,255,255,0.35); transform:scale(0.96); }
+
+        .page { display:none; padding:16px; animation: fadeSlideIn 0.35s ease; }
+        .page.active { display:block; }
+        @keyframes fadeSlideIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+        .banner-wrap {
+            border-radius:var(--radius); overflow:hidden; margin-bottom:14px;
+            background: linear-gradient(135deg, var(--primary-light), #DBEAFE);
+            min-height:110px; display:flex; align-items:center; justify-content:center;
+            position:relative; box-shadow: var(--shadow);
+        }
+        .banner-wrap::after {
+            content:''; position:absolute; inset:0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%232D8CFF' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .banner-wrap img { width:100%; display:block; object-fit:cover; max-height:180px; position:relative; z-index:1; }
+        .banner-placeholder {
+            color: var(--primary-deep); font-size:16px; font-weight:800;
+            padding:30px; text-align:center; letter-spacing:0.5px; position:relative; z-index:1;
+        }
+
+        .announcement-bar {
+            background: var(--primary-light); border:1px solid #BFDBFE;
+            border-radius:var(--radius-sm); padding:11px 14px; margin-bottom:14px;
+            font-size:13px; color: var(--primary-deep); display:flex; align-items:center; gap:8px;
+            font-weight:600;
+        }
+
+        .card {
+            background: var(--bg-card); border-radius:var(--radius);
+            padding:18px 16px; margin-bottom:14px;
+            box-shadow: var(--shadow); border: 1px solid rgba(229,231,235,0.6);
+        }
+        .card-title {
+            font-size:15px; font-weight:800; margin-bottom:14px; padding-bottom:10px;
+            border-bottom:2px solid #F3F4F6; display:flex; align-items:center; gap:8px;
+            color: var(--primary-deep);
+        }
+        .card-title .dot {
+            width:8px; height:8px; border-radius:50%; background: var(--primary);
+            flex-shrink:0; box-shadow: 0 0 10px rgba(45,140,255,0.45);
+        }
+
+        .input-group { margin-bottom:14px; }
+        .input-group label { display:block; font-size:13px; font-weight:700; color:var(--text-sub); margin-bottom:6px; }
+        .input-group input {
+            width:100%; padding:12px 14px; border:2px solid var(--border);
+            border-radius:var(--radius-sm); font-size:16px; font-family:var(--font-stack);
+            transition:var(--transition); background:#FAFBFC; outline:none;
+            color: var(--text-main);
+        }
+        .input-group input:focus {
+            border-color: var(--primary); background:#fff;
+            box-shadow: 0 0 0 4px rgba(45,140,255,0.12);
+        }
+        .input-group input.input-error { border-color: #EF4444; background:#FEF2F2; }
+        .input-error-text { color: #EF4444; font-size:12px; margin-top:6px; display:none; font-weight:600; }
+        .input-error-text.visible { display:block; }
+
+        .btn {
+            display:inline-flex; align-items:center; justify-content:center; gap:6px;
+            padding:13px 24px; border-radius:25px; font-size:15px; font-weight:700;
+            border:none; cursor:pointer; transition:var(--transition);
+            font-family:var(--font-stack); width:100%; letter-spacing: 0.2px;
+        }
+        .btn:active { transform:scale(0.97); }
+        .btn:disabled { opacity:0.5; pointer-events:none; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+            color:#fff; box-shadow: 0 6px 20px rgba(45,140,255,0.35);
+        }
+        .btn-primary:active { box-shadow: 0 2px 10px rgba(45,140,255,0.25); }
+
+        .btn-cta {
+            background: linear-gradient(135deg, var(--cta), var(--cta-deep));
+            color:#fff; box-shadow: 0 6px 20px rgba(255,152,0,0.40);
+            font-size:16px; letter-spacing:1px;
+        }
+        .btn-cta:active { box-shadow: 0 2px 10px rgba(255,152,0,0.30); }
+
+        .btn-outline {
+            background: #fff; color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-sm { padding:8px 16px; font-size:13px; border-radius:20px; width:auto; }
+
+        .status-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600; }
+        .status-processing { background:#FEF3C7; color:#B45309; border:1px solid #FDE68A; }
+        .status-success { background:#DCFCE7; color:#15803D; border:1px solid #BBF7D0; }
+        .status-failed { background:#FEE2E2; color:#B91C1C; border:1px solid #FECACA; }
+
+        .amount-options { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+        .amount-card {
+            border:2px solid var(--border); border-radius:var(--radius-sm);
+            padding:16px 10px; text-align:center; cursor:pointer;
+            background:#FAFBFC; user-select:none; transition: all .25s;
+        }
+        .amount-card:active { transform: scale(0.96); }
+        .amount-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #FAFBFC, var(--primary-light));
+            box-shadow: 0 4px 14px rgba(45,140,255,0.12);
+        }
+        .amount-card .amount-main { font-size:22px; font-weight:800; color: var(--primary-deep); }
+        .amount-card .amount-discount {
+            font-size:12px; color: var(--cta-deep); margin-top:5px; font-weight:700;
+            background: #FFF3E0; display:inline-block; padding:3px 10px; border-radius:10px;
+        }
+
+        .calc-summary {
+            background:#FAFBFC; border-radius:var(--radius-sm); padding:14px;
+            margin-bottom:14px; border:1px dashed #D1D5DB;
+        }
+        .calc-row { display:flex; justify-content:space-between; padding:7px 0; font-size:14px; color: var(--text-sub); }
+        .calc-row.total { border-top:1px solid #E5E7EB; margin-top:6px; padding-top:10px; font-weight:800; font-size:17px; color: var(--text-main); }
+        #calcDiscount { color: var(--cta-deep) !important; font-weight:700; }
+        #calcActual { color: var(--text-main) !important; font-size:18px !important; font-weight:800; }
+
+        .qr-section { text-align:center; padding:10px 0; }
+        .qr-tabs { display:flex; gap:8px; margin-bottom:12px; justify-content:center; }
+        .qr-tab {
+            padding:9px 18px; border-radius:20px; border:2px solid var(--border);
+            background:#fff; cursor:pointer; font-size:13px; font-weight:600;
+            transition: var(--transition); color: var(--text-sub);
+        }
+        .qr-tab.active {
+            border-color: var(--primary); background: var(--primary-light);
+            color: var(--primary-deep); font-weight:800;
+            box-shadow: 0 2px 8px rgba(45,140,255,0.10);
+        }
+        .qr-img-wrap { width:180px; height:180px; margin:0 auto; border-radius:var(--radius-sm); overflow:hidden; border:2px solid #E5E7EB; background:#fff; display:flex; align-items:center; justify-content:center; }
+        .qr-placeholder { color: var(--text-light); font-size:13px; padding:20px; text-align:center; }
+
+        .upload-area {
+            border:2px dashed #D1D5DB; border-radius:var(--radius-sm);
+            padding:20px; text-align:center; cursor:pointer;
+            background:#FAFBFC; transition: var(--transition);
+        }
+        .upload-area:active { background: #F0F9FF; }
+        .upload-area img { max-width:100%; max-height:200px; border-radius:6px; margin-top:8px; }
+        .upload-area.has-image { border-color: var(--primary); background: #F0F9FF; }
+        #uploadInput { display:none; }
+
+        .result-icon { font-size:64px; text-align:center; margin:20px 0; animation: bounceIn 0.5s ease; }
+        @keyframes bounceIn { 0%{ transform:scale(0.3); opacity:0; } 50%{ transform:scale(1.05); } 70%{ transform:scale(0.95); } 100%{ transform:scale(1); opacity:1; } }
+        .result-status { font-size:16px; font-weight:700; color: var(--text-main); }
+
+        .info-table { width:100%; font-size:13px; border-collapse:collapse; }
+        .info-table td { padding:10px 10px; border-bottom:1px solid #F3F4F6; word-break: break-all; }
+        .info-table td:first-child { color: var(--text-sub); width:30%; font-weight:600; white-space: nowrap; }
+
+        .cs-link {
+            display:flex; align-items:center; justify-content:center; gap:8px;
+            padding:14px; background:#fff; border-radius:25px;
+            color: var(--primary); font-weight:700; text-decoration:none;
+            border:2px solid var(--primary); margin-top:10px;
+            transition: var(--transition);
+        }
+        .cs-link:active { background: #F0F9FF; }
+
+        .modal-overlay {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(31, 41, 55, 0.55); z-index:999;
+            display:flex; align-items:center; justify-content:center;
+            backdrop-filter: blur(3px);
+        }
+        .modal-dialog {
+            background:#fff; border-radius:var(--radius); padding:20px;
+            max-width:90vw; max-height:85vh; overflow-y:auto;
+            box-shadow:var(--shadow-lg); width:400px; position:relative;
+        }
+        .modal-close { position:absolute; top:10px; right:14px; background:none; border:none; font-size:22px; cursor:pointer; color:#9CA3AF; }
+
+        .admin-container { max-width:800px; width:100%; padding:16px; }
+        .admin-tabs {
+            display:flex; gap:4px; flex-wrap:wrap; margin-bottom:16px;
+            background:#fff; border-radius:25px; padding:5px;
+            box-shadow:var(--shadow);
+        }
+        .admin-tab {
+            flex:1; min-width:70px; padding:10px 12px; border-radius:20px;
+            border:none; background:transparent; cursor:pointer;
+            font-size:13px; font-weight:600; color: var(--text-sub);
+            transition: var(--transition);
+        }
+        .admin-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+            color:#fff; font-weight:800;
+            box-shadow: 0 4px 12px rgba(45,140,255,0.30);
+        }
+        .admin-panel { display:none; }
+        .admin-panel.active { display:block; animation: fadeSlideIn 0.3s ease; }
+
+        .order-table { width:100%; border-collapse:collapse; font-size:12px; background:#fff; border-radius:var(--radius-sm); overflow:hidden; box-shadow:var(--shadow); }
+        .order-table th,.order-table td { padding:10px 8px; text-align:left; border-bottom:1px solid #F3F4F6; }
+        .order-table th { background:#FAFBFC; font-weight:700; color: var(--text-sub); font-size:11px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .badge { display:inline-block; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:700; }
+        .badge-processing { background:#FEF3C7; color:#92400E; }
+        .badge-failed { background:#FEE2E2; color:#B91C1C; }
+        .badge-success { background:#DCFCE7; color:#15803D; }
+
+        .search-box { display:flex; gap:8px; margin-bottom:14px; }
+        .search-box input {
+            flex:1; padding:10px 14px; border:2px solid var(--border);
+            border-radius:25px; font-size:14px; outline:none; transition: var(--transition);
+        }
+        .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(45,140,255,0.10); }
+
+        .settings-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid #F3F4F6; flex-wrap:wrap; gap:10px; }
+        .settings-row input[type="text"],.settings-row input[type="url"],.settings-row input[type="password"] {
+            flex:1; min-width:180px; padding:9px 12px;
+            border:2px solid var(--border); border-radius:20px; font-size:13px; outline:none; transition: var(--transition);
+        }
+        .settings-row input:focus { border-color: var(--primary); }
+        .img-upload-btn {
+            padding:8px 16px; border-radius:20px; background: var(--primary-light);
+            border:1px dashed var(--primary); cursor:pointer;
+            font-size:12px; color: var(--primary-deep); font-weight:700;
+            transition: var(--transition);
+        }
+        .img-upload-btn:active { background: #DBEAFE; }
+        .settings-preview-img { width:60px; height:60px; object-fit:contain; border-radius:8px; border:1px solid #E5E7EB; }
+
+        .toast {
+            position:fixed; top:20px; left:50%; transform:translateX(-50%);
+            background: var(--text-main); color:#fff;
+            padding:10px 22px; border-radius:25px; font-size:14px;
+            z-index:2000; animation: toastIn 0.3s ease, toastOut 0.3s ease 1.8s forwards;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.18); font-weight:600;
+        }
+        @keyframes toastIn { from{ opacity:0; transform:translateX(-50%) translateY(-20px); } to{ opacity:1; transform:translateX(-50%) translateY(0); } }
+        @keyframes toastOut { from{ opacity:1; } to{ opacity:0; transform:translateX(-50%) translateY(-20px); } }
+
+        #rechargeVoucherCode { background:#FFF7ED !important; color: var(--cta-deep) !important; font-weight:800 !important; border-color:#FDE68A !important; }
+
+        /* 加载遮罩 */
+        #loadingMask {
+            position: fixed; inset: 0; background: #F7FAFC; z-index: 3000;
+            display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+        }
+        #loadingMask .spinner {
+            width: 44px; height: 44px; border: 4px solid var(--primary-light);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        #loadingMask .tip { color: var(--text-sub); font-size: 14px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
-<div class="loading-mask" id="loadingMask"><div class="spinner"></div><span>正在加载数据…</span></div>
-<div class="app-container">
-<div class="nav-header">
-<div class="logo-area">
-<span class="logo-placeholder" id="navLogoPlaceholder">⛽</span>
-<span class="site-name" id="navSiteName">充值中心</span>
-</div>
-<div class="nav-actions">
-<button class="btn-nav" id="btnHome">🏠 首页</button>
-<button class="btn-nav" id="btnQuery">🔍 查订单</button>
-</div>
-</div>
+    <div class="app-container">
+        <div class="nav-header">
+            <div class="logo-area">
+                <span class="logo-placeholder" id="navLogoPlaceholder">⛽</span>
+                <span class="site-name" id="navSiteName">充值中心</span>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-nav" id="btnHome">🏠 首页</button>
+            </div>
+        </div>
 
-<!-- 首页 -->
-<div class="page" id="pageHome">
-<div class="banner-wrap" id="homeBanner"><div class="banner-placeholder"><div class="bp-title">🎉 充值特惠 · 代金券限时领</div><div class="bp-sub">充值即享优惠 · 代金券限量发放中，先到先得</div></div></div>
-<div class="announcement-bar"><span>📢</span><span id="announcementText">欢迎使用充值服务，代金券限量发放中！</span></div>
-<div class="card">
-<div class="card-title"><span class="dot"></span>领取电子代金券</div>
-<div class="input-group"><label>📱 手机号码</label><input type="tel" id="inputPhone" placeholder="请输入您的手机号码" maxlength="11" inputmode="numeric" autocomplete="tel"></div>
-<button class="btn btn-gold" id="btnClaim">🎫 立即领取电子代金券</button>
-<div style="margin-top:14px;text-align:center;" id="voucherStatusArea"><span style="color:#999;font-size:13px;">请输入手机号领取</span></div>
-<button class="btn btn-primary" style="margin-top:10px;" id="btnNext" disabled>📋 下一步 →</button>
-</div>
-</div>
+        <!-- 首页 -->
+        <div class="page active" id="pageHome">
+            <div class="banner-wrap" id="homeBanner"><span class="banner-placeholder">🎉 品牌充值 · 代金券限时领</span></div>
+            <div class="announcement-bar"><span>📢</span><span id="announcementText">欢迎使用充值服务，代金券限量发放中！</span></div>
+            <div class="card">
+                <div class="card-title"><span class="dot"></span>领取电子代金券</div>
+                <div class="input-group">
+                    <label>📱 手机号码</label>
+                    <input type="tel" id="inputPhone" placeholder="请输入11位手机号码" maxlength="11" autocomplete="off" inputmode="numeric" />
+                    <div class="input-error-text" id="phoneError">请输入有效的11位手机号码</div>
+                </div>
+                <button class="btn btn-cta" id="btnClaim">🎫 立即领取电子代金券</button>
+                <div style="margin-top:14px;text-align:center;" id="voucherStatusArea">
+                    <span style="color:var(--text-light);font-size:13px;">🟡 等待操作中…</span>
+                </div>
+                <button class="btn btn-primary" style="margin-top:10px;" id="btnNext" disabled>📋 下一步 →</button>
+            </div>
+        </div>
 
-<!-- 充值页 -->
-<div class="page" id="pageRecharge">
-<div class="card">
-<div class="card-title"><span class="dot"></span>充值信息</div>
-<div class="input-group"><label>📱 手机号</label><input type="text" id="rechargePhone" readonly></div>
-<div class="input-group"><label>👤 联系人</label><input type="text" id="rechargeContact" placeholder="请输入联系人姓名"></div>
-<div class="input-group"><label>🎫 电子券编号</label><input type="text" id="rechargeVoucherCode" readonly style="background:#fffef5;color:#8b5e1a;font-weight:600;border-color:#f0d78c;"></div>
-<div style="text-align:center;"><span class="status-badge" style="background:#E6F5FF;color:#0096D6;">🟢 已激活</span></div>
-</div>
-<div class="card">
-<div class="card-title"><span class="dot"></span>选择充值金额</div>
-<div class="amount-options" id="amountOptions">
-<div class="amount-card" data-amount="200" data-discount="28"><div class="amount-main">¥200</div><div class="amount-discount">🎫 代金券 ¥28</div></div>
-<div class="amount-card" data-amount="300" data-discount="58"><div class="amount-main">¥300</div><div class="amount-discount">🎫 代金券 ¥58</div></div>
-<div class="amount-card" data-amount="400" data-discount="98"><div class="amount-main">¥400</div><div class="amount-discount">🎫 代金券 ¥98</div></div>
-<div class="amount-card" data-amount="500" data-discount="128"><div class="amount-main">¥500</div><div class="amount-discount">🎫 代金券 ¥128</div></div>
-</div>
-<div class="calc-summary">
-<div class="calc-row"><span>充值金额</span><span id="calcAmount">¥0</span></div>
-<div class="calc-row"><span>代金券优惠</span><span style="color:#E60012;" id="calcDiscount">-¥0</span></div>
-<div class="calc-row total"><span>实付金额</span><span style="color:#c62828;font-size:18px;" id="calcActual">¥0</span></div>
-</div>
-</div>
-<div class="card">
-<div class="card-title"><span class="dot"></span>支付方式</div>
-<div class="qr-section">
-<div class="qr-tabs">
-<button class="qr-tab active" data-method="wechat"><svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:-3px;margin-right:4px;"><circle cx="12" cy="12" r="12" fill="#09BB07"/><path d="M9.2 9.1c-1.8 0-3.2 1.1-3.2 2.5 0 .8.5 1.5 1.2 2l-.3 1 1.1-.6c.4.1.8.2 1.2.2-.1-.3-.1-.5-.1-.8 0-1.6 1.6-2.8 3.6-2.8.2 0 .4 0 .6.1-.2-.8-.9-1.8-2.1-1.8zm-1.2 1.4c.3 0 .5.2.5.5s-.2.5-.5.5-.5-.2-.5-.5.2-.5.5-.5zm2.2 0c.3 0 .5.2.5.5s-.2.5-.5.5-.5-.2-.5-.5.2-.5.5-.5z" fill="#fff"/><path d="M16.5 14.2c0-1.3-1.3-2.4-3-2.4-1.8 0-3.2 1.1-3.2 2.4 0 1.3 1.4 2.4 3.2 2.4.4 0 .8-.1 1.1-.2l.9.5-.2-.8c.6-.4 1-1 1-1.5zm-3.8.8c-.3 0-.5-.2-.5-.5s.2-.5.5-.5.5.2.5.5-.2.5-.5.5zm1.9 0c-.3 0-.5-.2-.5-.5s.2-.5.5-.5.5.2.5.5-.2.5-.5.5z" fill="#fff"/></svg>微信支付</button>
-<button class="qr-tab" data-method="alipay"><svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:-3px;margin-right:4px;"><rect width="24" height="24" rx="5" fill="#1677FF"/><text x="12" y="17" font-size="14" font-weight="700" text-anchor="middle" fill="#fff" font-family="sans-serif">支</text></svg>支付宝</button>
-</div>
-<div class="qr-img-wrap" id="qrDisplay" data-payment="wechat"><span class="qr-placeholder">请在后台设置收款码</span></div>
-<p style="font-size:11px;color:#999;">请扫描上方二维码完成支付</p>
-</div>
-<div class="upload-area" id="uploadArea">
-<div class="upload-icon">📸</div>
-<div class="upload-text">点击上传付款截图</div>
-<img id="uploadPreview" style="display:none;">
-</div>
-<input type="file" id="uploadInput" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;">
-<button class="btn btn-primary" style="margin-top:12px;" id="submitOrderBtn">✅ 提交订单</button>
-</div>
-</div>
+        <!-- 充值页 -->
+        <div class="page" id="pageRecharge">
+            <div class="card">
+                <div class="card-title"><span class="dot"></span>充值信息</div>
+                <div class="input-group"><label>📱 手机号</label><input type="text" id="rechargePhone" readonly /></div>
+                <div class="input-group"><label>👤 联系人</label><input type="text" id="rechargeContact" placeholder="请输入联系人姓名" autocomplete="name" /></div>
+                <div class="input-group"><label>🎫 电子券编号</label><input type="text" id="rechargeVoucherCode" readonly /></div>
+                <div style="text-align:center;"><span class="status-badge status-success">🟢 已激活</span></div>
+            </div>
+            <div class="card">
+                <div class="card-title"><span class="dot"></span>选择充值金额</div>
+                <div class="amount-options" id="amountOptions">
+                    <div class="amount-card" data-amount="200" data-discount="28"><div class="amount-main">¥200</div><div class="amount-discount">🎫 代金券 ¥28</div></div>
+                    <div class="amount-card" data-amount="300" data-discount="58"><div class="amount-main">¥300</div><div class="amount-discount">🎫 代金券 ¥58</div></div>
+                    <div class="amount-card" data-amount="400" data-discount="98"><div class="amount-main">¥400</div><div class="amount-discount">🎫 代金券 ¥98</div></div>
+                    <div class="amount-card" data-amount="500" data-discount="128"><div class="amount-main">¥500</div><div class="amount-discount">🎫 代金券 ¥128</div></div>
+                </div>
+                <div class="calc-summary">
+                    <div class="calc-row"><span>充值金额</span><span id="calcAmount">¥0</span></div>
+                    <div class="calc-row"><span>代金券优惠</span><span id="calcDiscount">-¥0</span></div>
+                    <div class="calc-row total"><span>实付金额</span><span id="calcActual">¥0</span></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title"><span class="dot"></span>支付方式</div>
+                <div class="qr-section">
+                    <div class="qr-tabs">
+                        <button class="qr-tab active" data-method="wechat">💚 微信支付</button>
+                        <button class="qr-tab" data-method="alipay">💙 支付宝</button>
+                    </div>
+                    <div class="qr-img-wrap" id="qrDisplay" data-payment="wechat"><span class="qr-placeholder">请在后台设置收款码</span></div>
+                    <p style="font-size:11px;color:var(--text-light);">请扫描上方二维码完成支付</p>
+                </div>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">点击上传付款截图</div>
+                    <img id="uploadPreview" style="display:none;" alt="preview" />
+                </div>
+                <input type="file" id="uploadInput" accept="image/*" />
+                <button class="btn btn-primary" style="margin-top:12px;" id="submitOrderBtn">✅ 提交订单</button>
+            </div>
+        </div>
 
-<!-- 结果页 -->
-<div class="page" id="pageResult">
-<div class="card" style="text-align:center;">
-<div class="result-icon" id="resultIcon">⏳</div>
-<div class="result-status" id="resultStatus">🟡 处理中…</div>
-</div>
-<div class="card">
-<div class="card-title"><span class="dot"></span>订单详情</div>
-<table class="info-table">
-<tr><td>订单号</td><td id="resOrderId">-</td></tr>
-<tr><td>手机号</td><td id="resPhone">-</td></tr>
-<tr><td>电子券编号</td><td id="resVoucherCode">-</td></tr>
-<tr><td>充值金额</td><td id="resAmount">-</td></tr>
-<tr><td>代金券优惠</td><td id="resDiscount" style="color:#E60012;">-</td></tr>
-<tr><td>实付金额</td><td id="resActual" style="font-weight:700;">-</td></tr>
-<tr><td>状态</td><td id="resStatusCell">-</td></tr>
-</table>
-</div>
-<a class="cs-link" id="csLinkResult" href="#">💬 联系在线客服</a>
-<button class="btn btn-outline" style="margin-top:10px;" id="btnBackHome">返回首页</button>
-</div>
+        <!-- 结果页 -->
+        <div class="page" id="pageResult">
+            <div class="card" style="text-align:center;">
+                <div class="result-icon" id="resultIcon">⏳</div>
+                <div class="result-status" id="resultStatus">🟡 处理中……</div>
+            </div>
+            <div class="card">
+                <div class="card-title"><span class="dot"></span>订单详情</div>
+                <table class="info-table">
+                    <tr><td>订单号</td><td id="resOrderId">-</td></tr>
+                    <tr><td>手机号</td><td id="resPhone">-</td></tr>
+                    <tr><td>电子券编号</td><td id="resVoucherCode">-</td></tr>
+                    <tr><td>充值金额</td><td id="resAmount">-</td></tr>
+                    <tr><td>代金券优惠</td><td id="resDiscount">-</td></tr>
+                    <tr><td>实付金额</td><td id="resActual">-</td></tr>
+                    <tr><td>状态</td><td id="resStatusCell">-</td></tr>
+                </table>
+            </div>
+            <a class="cs-link" id="csLinkResult" href="#">💬 联系在线客服</a>
+            <button class="btn btn-outline" style="margin-top:10px;" id="btnBackHome">返回首页</button>
+        </div>
 
-<!-- 后台管理页（内嵌） -->
-<div class="page" id="pageAdmin">
-<div class="admin-container">
-<h3 style="text-align:center;color:var(--gd);">🔐 后台管理</h3>
-<div id="adminLoginArea">
-<div class="card">
-<div class="input-group"><label>管理员密码</label><input type="password" id="adminPasswordInput" placeholder="请输入管理密码" autocomplete="current-password"></div>
-<button class="btn btn-primary" id="btnAdminLogin">登录</button>
-<p style="font-size:11px;color:#999;text-align:center;">请使用管理员分配的密码登录</p>
-</div>
-</div>
-<div id="adminContentArea" style="display:none;">
-<div class="admin-tabs">
-<button class="admin-tab active" data-tab="orders">📋 订单管理</button>
-<button class="admin-tab" data-tab="qrcodes">📱 收款码</button>
-<button class="admin-tab" data-tab="service">💬 客服设置</button>
-<button class="admin-tab" data-tab="site">🌐 网站设置</button>
-</div>
-<div class="admin-panel active" id="adminPanelOrders">
-<div class="search-box">
-<input type="text" id="orderSearchInput" placeholder="搜索手机号/订单号">
-<button class="btn btn-sm btn-primary" id="btnSearchOrders">搜索</button>
-</div>
-<table class="order-table">
-<thead><tr><th>订单号</th><th>手机号</th><th>券编号</th><th>金额</th><th>实付</th><th>状态</th><th>操作</th></tr></thead>
-<tbody id="orderTableBody"></tbody>
-</table>
-</div>
-<div class="admin-panel" id="adminPanelQrcodes">
-<div class="card">
-<div class="settings-row"><label>💚 微信收款码</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="wechatQRInput"><button class="img-upload-btn" id="btnWechatQR">上传图片</button><img class="settings-preview-img" id="wechatQRPreview"><span id="wechatQRStatus">未设置</span></div>
-<div class="settings-row"><label>💙 支付宝收款码</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="alipayQRInput"><button class="img-upload-btn" id="btnAlipayQR">上传图片</button><img class="settings-preview-img" id="alipayQRPreview"><span id="alipayQRStatus">未设置</span></div>
-</div>
-</div>
-<div class="admin-panel" id="adminPanelService">
-<div class="card">
-<div class="settings-row"><label>客服名称</label><input type="text" id="csNameInput"></div>
-<div class="settings-row"><label>客服链接</label><input type="url" id="csLinkInput"></div>
-<button class="btn btn-primary btn-sm" id="btnSaveService">💾 保存客服设置</button>
-</div>
-</div>
-<div class="admin-panel" id="adminPanelSite">
-<div class="card">
-<div class="settings-row"><label>网站名称</label><input type="text" id="siteNameInput"></div>
-<div class="settings-row"><label>Logo图片</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="logoInput"><button class="img-upload-btn" id="btnLogo">上传Logo</button><img class="settings-preview-img" id="logoPreview"></div>
-<div class="settings-row"><label>Banner图片</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="bannerInput"><button class="img-upload-btn" id="btnBanner">上传Banner</button><img class="settings-preview-img" id="bannerPreview"></div>
-<div class="settings-row"><label>首页公告</label><input type="text" id="announcementInput"></div>
-<div class="settings-row"><label>管理密码</label><input type="password" id="adminPwdInput" placeholder="修改管理密码" autocomplete="new-password"></div>
-<button class="btn btn-primary btn-sm" id="btnSaveSite">💾 保存网站设置</button>
-</div>
-</div>
-<button class="btn btn-outline btn-sm" style="margin-top:12px;" id="btnAdminLogout">🚪 退出登录</button>
-</div>
-</div>
-</div>
+        <!-- 后台管理页 -->
+        <div class="page" id="pageAdmin">
+            <div class="admin-container">
+                <h3 style="text-align:center;color:var(--primary-deep);margin-bottom:16px;">🔐 后台管理</h3>
+                <div id="adminLoginArea">
+                    <div class="card">
+                        <div class="input-group"><label>管理员密码</label><input type="password" id="adminPasswordInput" placeholder="请输入管理密码" autocomplete="off" /></div>
+                        <button class="btn btn-primary" id="btnAdminLogin">登录</button>
+                        <p style="font-size:11px;color:var(--text-light);text-align:center;">默认密码：admin888（可在网站设置中修改）</p>
+                    </div>
+                </div>
+                <div id="adminContentArea" style="display:none;">
+                    <div class="admin-tabs">
+                        <button class="admin-tab active" data-tab="orders">📋 订单管理</button>
+                        <button class="admin-tab" data-tab="qrcodes">📱 收款码</button>
+                        <button class="admin-tab" data-tab="service">💬 客服设置</button>
+                        <button class="admin-tab" data-tab="site">🌐 网站设置</button>
+                    </div>
+                    <div class="admin-panel active" id="adminPanelOrders">
+                        <div class="search-box"><input type="text" id="orderSearchInput" placeholder="搜索手机号/订单号" /><button class="btn btn-sm btn-primary" id="btnSearchOrders">搜索</button></div>
+                        <table class="order-table"><thead><tr><th>订单号</th><th>手机号</th><th>券编号</th><th>金额</th><th>实付</th><th>状态</th><th>操作</th></tr></thead><tbody id="orderTableBody"></tbody></table>
+                    </div>
+                    <div class="admin-panel" id="adminPanelQRCodes">
+                        <div class="card">
+                            <div class="settings-row"><label>💚 微信收款码</label><input type="file" accept="image/*" style="display:none;" id="wechatQRInput" /><button class="img-upload-btn" id="btnWechatQR">上传图片</button><img class="settings-preview-img" id="wechatQRPreview" alt="wechat" style="display:none;" /><span id="wechatQRStatus">未设置</span></div>
+                            <div class="settings-row"><label>💙 支付宝收款码</label><input type="file" accept="image/*" style="display:none;" id="alipayQRInput" /><button class="img-upload-btn" id="btnAlipayQR">上传图片</button><img class="settings-preview-img" id="alipayQRPreview" alt="alipay" style="display:none;" /><span id="alipayQRStatus">未设置</span></div>
+                        </div>
+                    </div>
+                    <div class="admin-panel" id="adminPanelService">
+                        <div class="card">
+                            <div class="settings-row"><label>客服名称</label><input type="text" id="csNameInput" /></div>
+                            <div class="settings-row"><label>客服链接</label><input type="url" id="csLinkInput" /></div>
+                            <button class="btn btn-primary btn-sm" id="btnSaveService">💾 保存客服设置</button>
+                        </div>
+                    </div>
+                    <div class="admin-panel" id="adminPanelSite">
+                        <div class="card">
+                            <div class="settings-row"><label>网站名称</label><input type="text" id="siteNameInput" /></div>
+                            <div class="settings-row"><label>Logo图片</label><input type="file" accept="image/*" style="display:none;" id="logoInput" /><button class="img-upload-btn" id="btnLogo">上传Logo</button><img class="settings-preview-img" id="logoPreview" alt="logo" style="display:none;" /></div>
+                            <div class="settings-row"><label>Banner图片</label><input type="file" accept="image/*" style="display:none;" id="bannerInput" /><button class="img-upload-btn" id="btnBanner">上传Banner</button><img class="settings-preview-img" id="bannerPreview" alt="banner" style="display:none;" /></div>
+                            <div class="settings-row"><label>首页公告</label><input type="text" id="announcementInput" /></div>
+                            <div class="settings-row"><label>管理密码</label><input type="text" id="adminPwdInput" placeholder="修改管理密码（至少6位）" /></div>
+                            <button class="btn btn-primary btn-sm" id="btnSaveSite">💾 保存网站设置</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline btn-sm" style="margin-top:12px;" id="btnAdminLogout">🚪 退出登录</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- 订单查询模态框 -->
-<div class="modal-overlay" id="queryModal" style="display:none;">
-<div class="modal-dialog">
-<button class="modal-close" id="btnCloseQuery">✕</button>
-<h4>🔍 查询我的订单</h4>
-<div class="input-group" style="margin-top:12px;">
-<label>📱 手机号码</label>
-<input type="tel" id="queryPhone" placeholder="输入领券时的手机号" inputmode="numeric" maxlength="11">
-</div>
-<button class="btn btn-primary" id="btnQuerySubmit">查询</button>
-<div id="queryResult" style="margin-top:12px;"></div>
-</div>
-</div>
+    <!-- 弹窗 -->
+    <div class="modal-overlay" id="modalOverlay" style="display:none;">
+        <div class="modal-dialog" onclick="event.stopPropagation()">
+            <button class="modal-close" id="btnCloseModal">✕</button>
+            <h4 style="margin-bottom:12px;color:var(--primary-deep);">📸 支付凭证</h4>
+            <img id="modalImage" src="" style="width:100%;border-radius:6px;" alt="payment" />
+        </div>
+    </div>
 
-<!-- 查看凭证弹窗 -->
-<div class="modal-overlay" id="modalOverlay" style="display:none;">
-<div class="modal-dialog">
-<button class="modal-close" id="btnCloseModal">✕</button>
-<h4>📸 支付凭证</h4>
-<img id="modalImage" src="" style="width:100%;border-radius:6px;">
-</div>
-</div>
-</div>
+    <!-- 加载遮罩 -->
+    <div id="loadingMask">
+        <div class="spinner"></div>
+        <div class="tip">充值系统加载中…</div>
+    </div>
 
-<script>
-// 禁止页面缩放（双指/双击）
-(function(){
-  var lastTouchEnd = 0;
-  document.addEventListener('touchstart', function(e){ if(e.touches.length>1) e.preventDefault(); }, {passive:false});
-  document.addEventListener('touchend', function(e){
-    var now = (new Date()).getTime();
-    if(now - lastTouchEnd <= 300){ e.preventDefault(); }
-    lastTouchEnd = now;
-  }, {passive:false});
-  document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
-  document.addEventListener('dblclick', function(e){ e.preventDefault(); }, {passive:false});
-})();
-</script>
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
