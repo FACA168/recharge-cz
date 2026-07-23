@@ -18,7 +18,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--t);-webkit-tap-highl
 .nav-header .nav-actions{margin-left:auto;display:flex;gap:10px}
 .nav-header .btn-nav{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:10px 17px;border-radius:22px;font-size:15px;cursor:pointer;transition:var(--tr);white-space:nowrap;font-family:var(--fs)}
 .nav-header .btn-nav:active{background:rgba(255,255,255,0.28);transform:scale(.96)}
-.page{display:none;padding:20px 18px calc(24px + env(safe-area-inset-bottom));animation:fadeSlideIn .3s ease}
+.page{display:none;padding:18px 16px calc(24px + env(safe-area-inset-bottom));animation:fadeSlideIn .3s ease}
 .page.active{display:block}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .banner-wrap{border-radius:var(--r);overflow:hidden;margin-bottom:18px;box-shadow:var(--s);background:linear-gradient(135deg,#0096D6 0%,#1A3A6D 100%);min-height:150px;display:flex;align-items:center;justify-content:center}
@@ -104,7 +104,31 @@ body{font-family:var(--fs);background:var(--bg);color:var(--t);-webkit-tap-highl
 .error-container .big-icon{font-size:48px}
 .error-container .retry-btn{margin-top:16px;padding:10px 30px;border-radius:20px;border:none;background:#E60012;color:#fff;font-size:16px;cursor:pointer}
 .order-item{border-bottom:1px solid #eee;padding:10px 0;font-size:14px}
-.order-item📢</span><span id="announcementText">欢迎使用充值服务，代金券限量发放中！</span></div>
+.order-item:last-child{border-bottom:none}
+.order-item .order-id{font-weight:600;color:#1A3A6D}
+.order-item .order-status{float:right}
+.order-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.order-actions select{font-size:11px;padding:5px}
+</style>
+</head>
+<body>
+<div class="loading-mask" id="loadingMask"><div class="spinner"></div><span>正在加载数据…</span></div>
+<div class="app-container">
+<div class="nav-header">
+<div class="logo-area">
+<span class="logo-placeholder" id="navLogoPlaceholder">⛽</span>
+<span class="site-name" id="navSiteName">充值中心</span>
+</div>
+<div class="nav-actions">
+<button class="btn-nav" id="btnHome">🏠 首页</button>
+<button class="btn-nav" id="btnQuery">🔍 查订单</button>
+</div>
+</div>
+
+<!-- 首页 -->
+<div class="page" id="pageHome">
+<div class="banner-wrap" id="homeBanner"><div class="banner-placeholder"><div class="bp-title">🎉 充值特惠 · 代金券限时领</div><div class="bp-sub">充值即享优惠 · 代金券限量发放中，先到先得</div></div></div>
+<div class="announcement-bar"><span>📢</span><span id="announcementText">欢迎使用充值服务，代金券限量发放中！</span></div>
 <div class="card">
 <div class="card-title"><span class="dot"></span>领取电子代金券</div>
 <div class="input-group"><label>📱 手机号码</label><input type="tel" id="inputPhone" placeholder="请输入您的手机号码" maxlength="11" inputmode="numeric" autocomplete="tel"></div>
@@ -168,7 +192,49 @@ body{font-family:var(--fs);background:var(--bg);color:var(--t);-webkit-tap-highl
 <table class="info-table">
 <tr><td>订单号</td><td id="resOrderId">-</td></tr>
 <tr><td>手机号</td><td id="resPhone">-</td></tr>
-<tr><td>电子券编号</td><td id="resV收款码</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="alipayQRInput"><button class="img-upload-btn" id="btnAlipayQR">上传图片</button><img class="settings-preview-img" id="alipayQRPreview"><span id="alipayQRStatus">未设置</span></div>
+<tr><td>电子券编号</td><td id="resVoucherCode">-</td></tr>
+<tr><td>充值金额</td><td id="resAmount">-</td></tr>
+<tr><td>代金券优惠</td><td id="resDiscount" style="color:#E60012;">-</td></tr>
+<tr><td>实付金额</td><td id="resActual" style="font-weight:700;">-</td></tr>
+<tr><td>状态</td><td id="resStatusCell">-</td></tr>
+</table>
+</div>
+<a class="cs-link" id="csLinkResult" href="#">💬 联系在线客服</a>
+<button class="btn btn-outline" style="margin-top:10px;" id="btnBackHome">返回首页</button>
+</div>
+
+<!-- 后台管理页（内嵌） -->
+<div class="page" id="pageAdmin">
+<div class="admin-container">
+<h3 style="text-align:center;color:var(--gd);">🔐 后台管理</h3>
+<div id="adminLoginArea">
+<div class="card">
+<div class="input-group"><label>管理员密码</label><input type="password" id="adminPasswordInput" placeholder="请输入管理密码" autocomplete="current-password"></div>
+<button class="btn btn-primary" id="btnAdminLogin">登录</button>
+<p style="font-size:11px;color:#999;text-align:center;">请使用管理员分配的密码登录</p>
+</div>
+</div>
+<div id="adminContentArea" style="display:none;">
+<div class="admin-tabs">
+<button class="admin-tab active" data-tab="orders">📋 订单管理</button>
+<button class="admin-tab" data-tab="qrcodes">📱 收款码</button>
+<button class="admin-tab" data-tab="service">💬 客服设置</button>
+<button class="admin-tab" data-tab="site">🌐 网站设置</button>
+</div>
+<div class="admin-panel active" id="adminPanelOrders">
+<div class="search-box">
+<input type="text" id="orderSearchInput" placeholder="搜索手机号/订单号">
+<button class="btn btn-sm btn-primary" id="btnSearchOrders">搜索</button>
+</div>
+<table class="order-table">
+<thead><tr><th>订单号</th><th>手机号</th><th>券编号</th><th>金额</th><th>实付</th><th>状态</th><th>操作</th></tr></thead>
+<tbody id="orderTableBody"></tbody>
+</table>
+</div>
+<div class="admin-panel" id="adminPanelQrcodes">
+<div class="card">
+<div class="settings-row"><label>💚 微信收款码</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="wechatQRInput"><button class="img-upload-btn" id="btnWechatQR">上传图片</button><img class="settings-preview-img" id="wechatQRPreview"><span id="wechatQRStatus">未设置</span></div>
+<div class="settings-row"><label>💙 支付宝收款码</label><input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;" id="alipayQRInput"><button class="img-upload-btn" id="btnAlipayQR">上传图片</button><img class="settings-preview-img" id="alipayQRPreview"><span id="alipayQRStatus">未设置</span></div>
 </div>
 </div>
 <div class="admin-panel" id="adminPanelService">
@@ -213,6 +279,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--t);-webkit-tap-highl
 <button class="modal-close" id="btnCloseModal">✕</button>
 <h4>📸 支付凭证</h4>
 <img id="modalImage" src="" style="width:100%;border-radius:6px;">
+</div>
 </div>
 </div>
 
