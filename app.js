@@ -20,7 +20,7 @@ async function callProxy(action, data = null) {
   }
 }
 
-// 文件上传：前端把文件转 base64，发到 /api 的 uploadFile��由 Worker 用 service_role 写入 Storage
+// 文件上传：前端把文件转 base64，发到 /api 的 uploadFile，由 Worker 用 service_role 写入 Storage
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -61,7 +61,10 @@ function generateVoucherCode() { let c='OC-'; for(let i=0;i<10;i++) c+='ABCDEFGH
 function generateOrderId() { const n=new Date(); const t=n.getFullYear()+String(n.getMonth()+1).padStart(2,'0')+String(n.getDate()).padStart(2,'0')+String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0')+String(n.getSeconds()).padStart(2,'0'); return 'ORD'+t+Math.random().toString(36).substring(2,6).toUpperCase(); }
 function showToast(m) { const e=document.querySelector('.toast'); if(e)e.remove(); const t=document.createElement('div'); t.className='toast'; t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
 function $(id){ return document.getElementById(id); }
-function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[c])); }
+function escapeHtml(s) {
+  const map = { '&':'\\x26', '<':'\\x3C', '>':'\\x3E', '\"':'\\x22', "'":'\\x27' };
+  return String(s==null?'':s).replace(/[&<>"']/g, c => map[c]);
+}
 
 // ---------- 加载数据（全部走代理） ----------
 async function loadAllData() {
@@ -419,8 +422,7 @@ function renderOrderTable(filterText) {
       <td><span class="badge ${badgeClass}">${statusText}</span></td>
       <td>
         <div class="order-actions">
-          <button class="btn btn-sm btn-outline" data-act="view" data-id="${escapeHtml(o.id)}">查看凭证</button>
-          <select data-act="status" data-id="${escapeHtml(o.id)}" style="font-size:11px;padding:5px;">
+          <button class.id)}" style="font-size:11px;padding:5px;">
             <option value="">修改状态</option>
             <option value="processing" ${o.status==='processing'?'selected':''}>处理中</option>
             <option value="failed" ${o.status==='failed'?'selected':''}>充值失败</option>
