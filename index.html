@@ -20,7 +20,14 @@ body{font-family:var(--fs);background:var(--bg);color:var(--t);-webkit-tap-highl
 .nav-header .btn-nav:active{background:rgba(255,255,255,0.28);transform:scale(.96)}
 .page{display:none;padding:18px 16px calc(24px + env(safe-area-inset-bottom));animation:fadeSlideIn .3s ease}
 .page.active{display:block}
-#pageHome{min-height:calc(100vh - 84px - env(safe-area-inset-top) - env(safe-area-inset-bottom));display:flex;flex-direction:column;justify-content:flex-start;gap:18px;padding-top:24px}
+#pageHome{min-height:calc(100vh - 84px - env(safe-area-inset-top) - env(safe-area-inset-bottom));display:flex;flex-direction:column;justify-content:space-between;gap:18px;padding-top:24px;padding-bottom:24px}
+#pageHome .banner-wrap{flex:1.2;min-height:180px}
+#pageHome .announcement-bar{margin-bottom:0}
+#pageHome .card{flex:1.4;margin-bottom:0;display:flex;flex-direction:column;justify-content:center;min-height:220px}
+#pageHome .card-title{margin-bottom:14px}
+#pageHome .input-group{margin-bottom:14px;flex:1;display:flex;flex-direction:column;justify-content:center}
+#pageHome #btnClaim{margin-top:6px;padding:18px 36px;font-size:19px}
+#pageHome #btnNext{margin-top:14px}
 @keyframes fadeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .banner-wrap{border-radius:var(--r);overflow:hidden;margin-bottom:18px;box-shadow:var(--s);background:linear-gradient(135deg,#E6F5FF,#FFFFFF);min-height:150px;display:flex;align-items:center;justify-content:center}
 .banner-wrap img{width:100%;display:block;object-fit:cover;max-height:220px}
